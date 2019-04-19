@@ -34,20 +34,6 @@ def callback():
     return 'OK'
 
 
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    if len(event.message.text) == 0:
-        app.logger.warn('too short message to split: ' + event.message.text)
-        return
-
-    splitted = event.message.text.split()
-    if splitted[0] == '!리셋':
-        r.delete(ENTRY_RATINGS)
-
-    if splitted[0] == '!강등':
-        demote(event)
-
-
 def ratings_to_message(ratings):
     str = ''
     for person, rating in ratings.items():
@@ -55,8 +41,34 @@ def ratings_to_message(ratings):
     return str
 
 
-def demote(event):
+def delete_entry(event):
+    splitted = event.message.text.split()
+    try:
+        ratings_txt = r.get(ENTRY_RATINGS)
+        ratings = json.loads(ratings_txt, object_pairs_hook=OrderedDict)
+    except Exception as e:
+        app.logger.exception(e)
+        ratings = OrderedDict()
 
+    if len(splitted) < 2:
+        app.logger.warn('too short message to demote')
+        return
+
+    to_delete = splitted[1]
+    if to_delete in ratings:
+        del ratings[to_delete]
+        message = '삭제되었습니다'
+
+        ratings_entry = json.dumps(ratings)
+        r.set(ENTRY_RATINGS, ratings_entry)
+    else:
+        message = '삭제할 수 없습니다'
+
+    message += '\n\n' + ratings_to_message(ratings)
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+
+def demote(event):
     splitted = event.message.text.split()
     try:
         ratings_txt = r.get(ENTRY_RATINGS)
@@ -70,22 +82,39 @@ def demote(event):
         return
 
     if len(splitted) >= 3:
-        to_demote = splitted[1]
-        demote_rating = splitted[2]
+        to_demote = splitted[1:-1]
+        to_demote = ' '.join(to_demote)
+        demote_rating = splitted[-1]
 
     if to_demote in ratings:
         del ratings[to_demote]
 
     ratings[to_demote] = demote_rating
 
-    message = ratings_to_message(ratings)
-
     ratings_entry = json.dumps(ratings)
     r.set(ENTRY_RATINGS, ratings_entry)
 
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=message))
+    message = ratings_to_message(ratings)
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    if len(event.message.text) == 0:
+        app.logger.warn('too short message to split: ' + event.message.text)
+        return
+
+    splitted = event.message.text.split()
+    if splitted[0] == '!리셋':
+        r.delete(ENTRY_RATINGS)
+        message = '리셋되었습니다'
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+    if splitted[0] == '!삭제':
+        delete_entry(event)
+
+    if splitted[0] == '!강등':
+        demote(event)
 
 
 if __name__ == "__main__":
