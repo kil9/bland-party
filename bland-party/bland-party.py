@@ -68,7 +68,7 @@ def delete_entry(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def demote(event):
+def adjust_ranking(event, action):
     splitted = event.message.text.split()
     try:
         ratings_txt = r.get(ENTRY_RATINGS)
@@ -78,18 +78,20 @@ def demote(event):
         ratings = OrderedDict()
 
     if len(splitted) < 3:
-        app.logger.warn('too short message to demote')
+        app.logger.warn('too short message to promote/demote')
         return
 
     if len(splitted) >= 3:
-        to_demote = splitted[1:-1]
-        to_demote = ' '.join(to_demote)
-        demote_rating = splitted[-1]
+        to_adjust = splitted[1:-1]
+        to_adjust = ' '.join(to_adjust)
+        ranking_title = splitted[-1]
 
-    if to_demote in ratings:
-        del ratings[to_demote]
+    if to_adjust in ratings:
+        del ratings[to_adjust]
 
-    ratings[to_demote] = demote_rating
+    ratings[to_adjust] = ranking_title
+    if action == 'promote':
+        ratings.move_to_end(to_adjust, last=False)
 
     ratings_entry = json.dumps(ratings)
     r.set(ENTRY_RATINGS, ratings_entry)
@@ -114,7 +116,10 @@ def handle_message(event):
         delete_entry(event)
 
     if splitted[0] == '!강등':
-        demote(event)
+        adjust_ranking('demote', event)
+
+    if splitted[0] == '!승급':
+        adjust_ranking('promote', event)
 
 
 if __name__ == "__main__":
