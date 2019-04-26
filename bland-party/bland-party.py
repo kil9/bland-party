@@ -107,6 +107,14 @@ def handle_message(event):
         return
 
     splitted = event.message.text.split()
+    if '!도움' in event.message.text:
+        message = '*demoter_bot*\n\n' + \
+        '*!도움* 도움말 보기\n' + \
+        '*!강등 @아이디 등급* 당원을 강등합니다\n' + \
+        '*!승급 @아이디 등급* 당원을 승급합니다\n' + \
+        '*!삭제 @아이디* 당원을 삭제합니다\n'
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
     if splitted[0] == '!reset':
         r.delete(ENTRY_RATINGS)
         message = '리셋되었습니다'
