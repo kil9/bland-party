@@ -81,7 +81,6 @@ def load_ratings(r_entry):
 
 def extract_entry(event):
     if event.source.type == 'group':
-        print(dir(event.source))
         return ENTRY_RATINGS + '_' + event.source.group_id
     return ENTRY_RATINGS + '_' + event.source.user_id
 
