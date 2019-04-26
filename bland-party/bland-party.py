@@ -46,14 +46,10 @@ def ratings_to_message(ratings):
 
 
 def delete_entry(event):
-    splitted = event.message.text.split()
-    try:
-        ratings_txt = r.get(ENTRY_RATINGS)
-        ratings = json.loads(ratings_txt, object_pairs_hook=OrderedDict)
-    except Exception as e:
-        app.logger.exception(e)
-        ratings = OrderedDict()
+    r_entry = extract_entry(event)
+    ratings = load_ratings(r_entry)
 
+    splitted = event.message.text.split()
     if len(splitted) < 2:
         app.logger.warn('too short message to demote')
         return
@@ -64,7 +60,7 @@ def delete_entry(event):
         message = '삭제되었습니다'
 
         ratings_entry = json.dumps(ratings)
-        r.set(ENTRY_RATINGS, ratings_entry)
+        r.set(r_entry, ratings_entry)
     else:
         message = '삭제할 수 없습니다'
 
@@ -72,16 +68,9 @@ def delete_entry(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def load_ratings():
+def load_ratings(r_entry):
     try:
-        ratings_txt = r.get(ENTRY_RATINGS)
-        ratings = json.loads(ratings_txt, object_pairs_hook=OrderedDict)
-    except Exception as e:
-        app.logger.exception(e)
-        ratings = OrderedDict()
-
-    try:
-        ratings_txt = r.get(ENTRY_RATINGS)
+        ratings_txt = r.get(r_entry)
         ratings = json.loads(ratings_txt, object_pairs_hook=OrderedDict)
     except Exception as e:
         app.logger.exception(e)
@@ -90,8 +79,24 @@ def load_ratings():
     return ratings
 
 
+def extract_entry(event):
+    if event.source.type == 'group':
+        print(dir(event.source))
+        return ENTRY_RATINGS + '_' + event.source.group_id
+    return ENTRY_RATINGS + '_' + event.source.user_id
+
+
 def adjust_ranking(action, event):
-    ratings = load_ratings()
+    '''
+    ** event example **
+    {"message": {"id": "9760259091048", "text": "\ubaa8\ubc14\uc77c \ub77c\uc778\uc5d0\uc120 \ubcfc\ub4dc\uac00 \uc5c6\ub098\ubd04", "type": "text"},
+     "replyToken": "4b35e226593e42a7ba0f53fd34b4a71b",
+     "source": {"groupId": "C96673d1530d37de2b0a8ffc2e5df5f1f", "type": "group", "userId": "U13990d12ea3aa82eef9e01fcea9a963f"},
+     "timestamp": 1556272465993, "type": "message"}
+     '''
+
+    r_entry = extract_entry(event)
+    ratings = load_ratings(r_entry)
 
     splitted = event.message.text.split()
 
@@ -112,14 +117,15 @@ def adjust_ranking(action, event):
         ratings.move_to_end(to_adjust, last=False)
 
     ratings_entry = json.dumps(ratings)
-    r.set(ENTRY_RATINGS, ratings_entry)
+    r.set(r_entry, ratings_entry)
 
     message = ratings_to_message(ratings)
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
 def show_ranking(event):
-    ratings = load_ratings()
+    r_entry = extract_entry(event)
+    ratings = load_ratings(r_entry)
     message = ratings_to_message(ratings)
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
@@ -141,7 +147,7 @@ def handle_message(event):
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
     if splitted[0] == '!reset':
-        r.delete(ENTRY_RATINGS)
+        r.delete(r_entry)
         message = '리셋되었습니다'
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
