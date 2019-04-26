@@ -136,6 +136,9 @@ def handle_message(event):
         app.logger.warn('too short message to split: ' + event.message.text)
         return
 
+    if '!' in event.message.text:
+        app.logger.info(event)
+
     splitted = event.message.text.split()
     if '!도움' in event.message.text:
         message = '*demoter_bot*\n\n' + \
