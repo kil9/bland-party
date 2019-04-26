@@ -72,14 +72,28 @@ def delete_entry(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def adjust_ranking(action, event):
-    splitted = event.message.text.split()
+def load_ratings():
     try:
         ratings_txt = r.get(ENTRY_RATINGS)
         ratings = json.loads(ratings_txt, object_pairs_hook=OrderedDict)
     except Exception as e:
         app.logger.exception(e)
         ratings = OrderedDict()
+
+    try:
+        ratings_txt = r.get(ENTRY_RATINGS)
+        ratings = json.loads(ratings_txt, object_pairs_hook=OrderedDict)
+    except Exception as e:
+        app.logger.exception(e)
+        ratings = OrderedDict()
+
+    return ratings
+
+
+def adjust_ranking(action, event):
+    ratings = load_ratings()
+
+    splitted = event.message.text.split()
 
     if len(splitted) < 3:
         app.logger.warn('too short message to promote/demote')
@@ -104,6 +118,12 @@ def adjust_ranking(action, event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
+def show_ranking(event):
+    ratings = load_ratings()
+    message = ratings_to_message(ratings)
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     if len(event.message.text) == 0:
@@ -114,9 +134,10 @@ def handle_message(event):
     if '!도움' in event.message.text:
         message = '*demoter_bot*\n\n' + \
             '*!도움* 도움말 보기\n' + \
+            '*!등급* 당원 등급을 조회합니다\n' + \
             '*!강등 @아이디 등급* 당원을 강등합니다\n' + \
             '*!승급 @아이디 등급* 당원을 승급합니다\n' + \
-            '*!삭제 @아이디* 당원을 삭제합니다\n'
+            '*!삭제 @아이디* 당원을 삭제합니다'
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
     if splitted[0] == '!reset':
@@ -132,6 +153,9 @@ def handle_message(event):
 
     if splitted[0] == '!승급':
         adjust_ranking('promote', event)
+
+    if splitted[0] == '!등급':
+        show_ranking(event)
 
 
 if __name__ == "__main__":
