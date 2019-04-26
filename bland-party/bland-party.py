@@ -107,7 +107,7 @@ def handle_message(event):
         return
 
     splitted = event.message.text.split()
-    if splitted[0] == '!리셋':
+    if splitted[0] == '!reset':
         r.delete(ENTRY_RATINGS)
         message = '리셋되었습니다'
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
