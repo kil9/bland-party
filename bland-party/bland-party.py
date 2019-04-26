@@ -12,6 +12,9 @@ from linebot.models import (
 
 from config import app, r, line_bot_api, handler
 
+from utils import rreplace
+
+
 ENTRY_RATINGS = 'ratings'
 
 
@@ -37,7 +40,8 @@ def callback():
 def ratings_to_message(ratings):
     str = ''
     for person, rating in ratings.items():
-        str += '{} {}\n'.format(rating, person)
+        str += '{} {}\n'.format(person, rating)
+    rreplace(str, '\n', '', 1)
     return str
 
 
@@ -64,7 +68,7 @@ def delete_entry(event):
     else:
         message = '삭제할 수 없습니다'
 
-    message += '\n\n' + ratings_to_message(ratings)
+    message = ratings_to_message(ratings) + '\n\n' + message
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
@@ -109,10 +113,10 @@ def handle_message(event):
     splitted = event.message.text.split()
     if '!도움' in event.message.text:
         message = '*demoter_bot*\n\n' + \
-        '*!도움* 도움말 보기\n' + \
-        '*!강등 @아이디 등급* 당원을 강등합니다\n' + \
-        '*!승급 @아이디 등급* 당원을 승급합니다\n' + \
-        '*!삭제 @아이디* 당원을 삭제합니다\n'
+            '*!도움* 도움말 보기\n' + \
+            '*!강등 @아이디 등급* 당원을 강등합니다\n' + \
+            '*!승급 @아이디 등급* 당원을 승급합니다\n' + \
+            '*!삭제 @아이디* 당원을 삭제합니다\n'
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
     if splitted[0] == '!reset':
