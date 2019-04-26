@@ -68,7 +68,7 @@ def delete_entry(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def adjust_ranking(event, action):
+def adjust_ranking(action, event):
     splitted = event.message.text.split()
     try:
         ratings_txt = r.get(ENTRY_RATINGS)
