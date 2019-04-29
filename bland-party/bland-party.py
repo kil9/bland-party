@@ -16,6 +16,11 @@ from utils import rreplace
 
 
 ENTRY_RATINGS = 'ratings'
+# ratings_{groupid}
+# ratings_{userid}
+
+ENTRY_GROUP = 'group'
+# chinfo_{groupid}
 
 
 @app.route("/callback", methods=['POST'])
@@ -45,9 +50,15 @@ def ratings_to_message(ratings):
     return str
 
 
+def extract_entry(event):
+    if event.source.type == 'group':
+        return ENTRY_RATINGS + '_' + event.source.group_id
+    return ENTRY_RATINGS + '_' + event.source.user_id
+
+
 def delete_entry(event):
     r_entry = extract_entry(event)
-    ratings = load_ratings(r_entry)
+    ratings = load_ordered_dict(r_entry)
 
     splitted = event.message.text.split()
     if len(splitted) < 2:
@@ -68,21 +79,15 @@ def delete_entry(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def load_ratings(r_entry):
+def load_ordered_dict(key):
     try:
-        ratings_txt = r.get(r_entry)
-        ratings = json.loads(ratings_txt, object_pairs_hook=OrderedDict)
+        value_txt = r.get(key)
+        ordered_dict = json.loads(value_txt, object_pairs_hook=OrderedDict)
     except Exception as e:
         app.logger.exception(e)
-        ratings = OrderedDict()
+        ordered_dict = OrderedDict()
 
-    return ratings
-
-
-def extract_entry(event):
-    if event.source.type == 'group':
-        return ENTRY_RATINGS + '_' + event.source.group_id
-    return ENTRY_RATINGS + '_' + event.source.user_id
+    return ordered_dict
 
 
 def adjust_ranking(action, event):
@@ -95,7 +100,7 @@ def adjust_ranking(action, event):
      '''
 
     r_entry = extract_entry(event)
-    ratings = load_ratings(r_entry)
+    ratings = load_ordered_dict(r_entry)
 
     splitted = event.message.text.split()
 
@@ -124,9 +129,22 @@ def adjust_ranking(action, event):
 
 def show_ranking(event):
     r_entry = extract_entry(event)
-    ratings = load_ratings(r_entry)
+    ratings = load_ordered_dict(r_entry)
     message = ratings_to_message(ratings)
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+
+def update_message_frequency(event):
+    group_key = '{}_{}'.format(ENTRY_GROUP, event.source.group_id)
+    member_info = load_ordered_dict(group_key)
+    user_id = event.source.user_id
+    if user_id in member_info:
+        member_info[user_id]['n_message'] += 1
+    else:
+        member_info[user_id] = {'n_message': 1}
+
+    member_info_bytes = json.dumps(member_info)
+    r.set(group_key, member_info_bytes)
 
 
 @handler.add(MessageEvent, message=TextMessage)
@@ -134,6 +152,9 @@ def handle_message(event):
     if len(event.message.text) == 0:
         app.logger.warn('too short message to split: ' + event.message.text)
         return
+
+    if event.source.type == 'group':
+        update_message_frequency(event)
 
     if '!' in event.message.text:
         app.logger.info(event)
@@ -149,6 +170,7 @@ def handle_message(event):
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
     if splitted[0] == '!reset':
+        r_entry = extract_entry(event)
         r.delete(r_entry)
         message = '리셋되었습니다'
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
