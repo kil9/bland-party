@@ -154,9 +154,12 @@ def show_frequency(event):
 
     sorted_users = sorted(message_frequency.items(), key=lambda m: m[1], reverse=True)
 
+    sum_messages = sum((m[1] for m in sorted_users))
+
     message = '*오늘의 메시지 수*\n\n'
     for user_name, frequency in sorted_users:
-        message += '{}: {}회\n'.format(user_name, frequency)
+        message += '{0}: {1}회 ({2:.1f}%)\n'.format(
+                user_name, frequency, frequency/sum_messages*100.0)
 
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
