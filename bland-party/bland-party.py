@@ -23,6 +23,12 @@ ENTRY_GROUP = 'group'
 # chinfo_{groupid}
 
 
+@app.route("/reset/<group_id>", methods=['GET'])
+def reset_group(group_id):
+    group_key = '{}_{}'.format(ENTRY_GROUP, group_id)
+    r.delete(group_key)
+
+
 @app.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
@@ -93,9 +99,11 @@ def load_ordered_dict(key):
 def adjust_ranking(action, event):
     '''
     ** event example **
-    {"message": {"id": "9760259091048", "text": "\ubaa8\ubc14\uc77c \ub77c\uc778\uc5d0\uc120 \ubcfc\ub4dc\uac00 \uc5c6\ub098\ubd04", "type": "text"},
+    {"message": {"id": "9760259091048", "text": "text text", "type": "text"},
      "replyToken": "4b35e226593e42a7ba0f53fd34b4a71b",
-     "source": {"groupId": "C96673d1530d37de2b0a8ffc2e5df5f1f", "type": "group", "userId": "U13990d12ea3aa82eef9e01fcea9a963f"},
+     "source": {"groupId": "C96673d1530d37de2b0a8ffc2e5df5f1f",
+                "type": "group",
+                "userId": "U13990d12ea3aa82eef9e01fcea9a963f"},
      "timestamp": 1556272465993, "type": "message"}
      '''
 
@@ -128,9 +136,28 @@ def adjust_ranking(action, event):
 
 
 def show_ranking(event):
-    r_entry = extract_entry(event)
-    ratings = load_ordered_dict(r_entry)
+    rating_key = extract_entry(event)
+    ratings = load_ordered_dict(rating_key)
     message = ratings_to_message(ratings)
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+
+def show_frequency(event):
+    group_id = event.source.group_id
+    group_key = '{}_{}'.format(ENTRY_GROUP, event.source.group_id)
+    member_info = load_ordered_dict(group_key)
+
+    message_frequency = OrderedDict()
+    for user_id, user_info in member_info.items():
+        profile = line_bot_api.get_group_member_profile(group_id, user_id)
+        message_frequency[profile.display_name] = user_info['n_message']
+
+    sorted_users = sorted(message_frequency.items(), key=lambda m: m[1], reverse=True)
+
+    message = '*오늘의 메시지 수*\n\n'
+    for user_name, frequency in sorted_users:
+        message += '{}: {}회\n'.format(user_name, frequency)
+
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
@@ -164,6 +191,7 @@ def handle_message(event):
         message = '*demoter_bot*\n\n' + \
             '*!도움* 도움말 보기\n' + \
             '*!등급* 당원 등급을 조회합니다\n' + \
+            '*!빈도* 당원의 활동량을 조회합니다\n' + \
             '*!강등 @아이디 등급* 당원을 강등합니다\n' + \
             '*!승급 @아이디 등급* 당원을 승급합니다\n' + \
             '*!삭제 @아이디* 당원을 삭제합니다'
@@ -177,6 +205,9 @@ def handle_message(event):
 
     if splitted[0] == '!삭제':
         delete_entry(event)
+
+    if splitted[0] in ('!빈도', '!частота'):
+        show_frequency(event)
 
     if splitted[0] == '!강등':
         adjust_ranking('demote', event)
