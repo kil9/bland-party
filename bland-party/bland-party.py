@@ -157,7 +157,10 @@ def show_frequency(event):
     sum_messages = sum((m[1] for m in sorted_users))
 
     message = '*오늘의 메시지 수*\n\n'
-    for user_name, frequency in sorted_users:
+    for i, (user_name, frequency) in enumerate(sorted_users):
+        medals = {0: '🥇', 1: '🥈', 2: '🥉'}
+        if i in medals:
+            message += '{} '.format(medals[i])
         message += '{0}: {1}회 ({2:.1f}%)\n'.format(
                 user_name, frequency, frequency/sum_messages*100.0)
 
