@@ -1,4 +1,5 @@
 import json
+import random
 from collections import OrderedDict
 
 from flask import request, abort
@@ -142,6 +143,20 @@ def show_ranking(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
+def show_today_message(event):
+    group_id = event.source.group_id
+    group_key = '{}_{}'.format(ENTRY_GROUP, event.source.group_id)
+    member_info = load_ordered_dict(group_key)
+
+    filtered = filter(lambda x: 'message_today' in x[1], list(member_info.items()))
+
+    user_id, user_info = random.choice(list(filtered))
+    profile = line_bot_api.get_group_member_profile(group_id, user_id)
+    message = '*오늘의 명언*\n\n'
+    message += '{}: {}'.format(profile.display_name, user_info['message_today'])
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+
 def show_frequency(event):
     group_id = event.source.group_id
     group_key = '{}_{}'.format(ENTRY_GROUP, event.source.group_id)
@@ -167,14 +182,19 @@ def show_frequency(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def update_message_frequency(event):
+def message_preprocess(event):
     group_key = '{}_{}'.format(ENTRY_GROUP, event.source.group_id)
     member_info = load_ordered_dict(group_key)
     user_id = event.source.user_id
+
+    message = event.message.text
     if user_id in member_info:
+        if random.randint(0, member_info[user_id]['n_message']) == 0 or \
+                'message_today' not in member_info[user_id]:  # tmp condition
+            member_info[user_id]['message_today'] = message
         member_info[user_id]['n_message'] += 1
     else:
-        member_info[user_id] = {'n_message': 1}
+        member_info[user_id] = {'n_message': 1, 'message_today': message}
 
     member_info_bytes = json.dumps(member_info)
     r.set(group_key, member_info_bytes)
@@ -187,7 +207,7 @@ def handle_message(event):
         return
 
     if event.source.type == 'group':
-        update_message_frequency(event)
+        message_preprocess(event)
 
     if '!' in event.message.text:
         app.logger.info(event)
@@ -200,7 +220,8 @@ def handle_message(event):
             '*!빈도* 당원의 활동량을 조회합니다\n' + \
             '*!강등 @아이디 등급* 당원을 강등합니다\n' + \
             '*!승급 @아이디 등급* 당원을 승급합니다\n' + \
-            '*!삭제 @아이디* 당원을 삭제합니다'
+            '*!삭제 @아이디* 당원 등급을 삭제합니다' + \
+            '*!명언* 오늘의 명언을 출력합니다'
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
     if splitted[0] == '!reset':
@@ -223,6 +244,9 @@ def handle_message(event):
 
     if splitted[0] == '!등급':
         show_ranking(event)
+
+    if splitted[0] == '!명언':
+        show_today_message(event)
 
 
 if __name__ == "__main__":
