@@ -23,8 +23,6 @@ ENTRY_RATINGS = 'ratings'
 ENTRY_GROUP = 'group'
 # chinfo_{groupid}
 
-USER_PADDING = 12
-
 
 @app.route("/groups/<group_id>", methods=['DELETE'])
 def reset_group(group_id):
@@ -66,7 +64,7 @@ def callback():
 def ratings_to_message(ratings):
     str = ''
     for person, rating in ratings.items():
-        str += '{} {}\n'.format(person.rjust(USER_PADDING), rating)
+        str += '{} {}\n'.format(person, rating)
     rreplace(str, '\n', '', 1)
     return str
 
@@ -180,7 +178,7 @@ def show_frequency(event):
         if i in medals:
             message += '{} '.format(medals[i])
         message += '{0}: {1}회 ({2:.1f}%)\n'.format(
-                user_name.rjust(USER_PADDING), frequency, frequency/sum_messages*100.0)
+                user_name, frequency, frequency/sum_messages*100.0)
 
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
