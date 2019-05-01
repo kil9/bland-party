@@ -192,7 +192,7 @@ def has_to_change_message(entry, message):
 
     if random.randint(0, entry['n_message']) == 0:
         return True
-    elif len(message) > len(entry['n_message']) and random.randint(0, entry['n_message']) == 0:
+    elif len(message) > len(entry['message_today']) and random.randint(0, entry['n_message']) == 0:
         return True
 
     return False
