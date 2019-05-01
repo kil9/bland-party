@@ -13,7 +13,7 @@ from linebot.models import (
 
 from config import app, r, line_bot_api, handler
 
-from utils import rreplace
+from utils import rreplace, load_ordered_dict
 
 
 ENTRY_RATINGS = 'ratings'
@@ -24,10 +24,22 @@ ENTRY_GROUP = 'group'
 # chinfo_{groupid}
 
 
-@app.route("/reset/<group_id>", methods=['GET'])
+@app.route("/groups/<group_id>", methods=['DELETE'])
 def reset_group(group_id):
     group_key = '{}_{}'.format(ENTRY_GROUP, group_id)
     r.delete(group_key)
+
+    return 'ok'
+
+
+@app.route("/groups", methods=['DELETE'])
+def reset_all_groups():
+    s, scanned = r.scan(0, ENTRY_GROUP + '*')
+    group_ids = (b.decode('utf-8') for b in scanned)
+    for group_id in group_ids:
+        reset_group(group_id)
+
+    return 'ok'
 
 
 @app.route("/callback", methods=['POST'])
@@ -84,17 +96,6 @@ def delete_entry(event):
 
     message = ratings_to_message(ratings) + '\n\n' + message
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
-
-
-def load_ordered_dict(key):
-    try:
-        value_txt = r.get(key)
-        ordered_dict = json.loads(value_txt, object_pairs_hook=OrderedDict)
-    except Exception as e:
-        app.logger.exception(e)
-        ordered_dict = OrderedDict()
-
-    return ordered_dict
 
 
 def adjust_ranking(action, event):
@@ -210,8 +211,9 @@ def message_preprocess(event):
             member_info[user_id]['message_today'] = message
 
     member_info[user_id]['n_message'] += 1
-    member_info_bytes = json.dumps(member_info)
-    r.set(group_key, member_info_bytes)
+    member_info_serialized = json.dumps(member_info)
+
+    r.setex(group_key, 86400, member_info_serialized)
 
 
 @handler.add(MessageEvent, message=TextMessage)
