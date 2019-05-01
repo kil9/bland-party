@@ -17,11 +17,11 @@ from utils import rreplace, load_ordered_dict
 
 
 ENTRY_RATINGS = 'ratings'
-# ratings_{groupid}
-# ratings_{userid}
+# ratings_{group_id}
+# ratings_{user_id}
 
 ENTRY_GROUP = 'group'
-# chinfo_{groupid}
+# group_{group_id}
 
 
 @app.route("/groups/<group_id>", methods=['DELETE'])
