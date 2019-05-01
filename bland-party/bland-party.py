@@ -182,20 +182,34 @@ def show_frequency(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
+def has_to_change_message(entry, message):
+    if message.beginswith('!'):
+        return False
+
+    if 'message_today' not in entry:
+        return True
+
+    if random.randint(0, entry['n_message']) == 0:
+        return True
+    elif len(message) > len(entry['n_message']) and random.randint(0, entry['n_message']) == 0:
+        return True
+
+    return False
+
+
 def message_preprocess(event):
     group_key = '{}_{}'.format(ENTRY_GROUP, event.source.group_id)
     member_info = load_ordered_dict(group_key)
     user_id = event.source.user_id
 
     message = event.message.text
-    if user_id in member_info:
-        if random.randint(0, member_info[user_id]['n_message']) == 0 or \
-                'message_today' not in member_info[user_id]:  # tmp condition
-            member_info[user_id]['message_today'] = message
-        member_info[user_id]['n_message'] += 1
+    if user_id not in member_info:
+        member_info[user_id] = {'n_message': 0, 'message_today': message}
     else:
-        member_info[user_id] = {'n_message': 1, 'message_today': message}
+        if has_to_change_message(member_info[user_id], message):
+            member_info[user_id]['message_today'] = message
 
+    member_info[user_id]['n_message'] += 1
     member_info_bytes = json.dumps(member_info)
     r.set(group_key, member_info_bytes)
 
