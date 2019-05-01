@@ -186,7 +186,7 @@ def show_frequency(event):
 
 
 def has_to_change_message(entry, message):
-    if message.beginswith('!'):
+    if message.startswith('!'):
         return False
 
     if 'message_today' not in entry:
