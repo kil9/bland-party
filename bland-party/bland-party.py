@@ -15,6 +15,8 @@ from config import app, r, line_bot_api, handler
 
 from utils import rreplace
 
+from help import help_message
+
 
 ENTRY_RATINGS = 'ratings'
 # ratings_{group_id}
@@ -235,14 +237,7 @@ def handle_message(event):
     message_preprocess(member_info, event)
 
     if '!도움' in event.message.text:
-        message = '*demoter_bot*\n\n' + \
-            '*!도움* 도움말 보기\n' + \
-            '*!등급* 당원 등급을 조회합니다\n' + \
-            '*!빈도* 당원의 활동량을 조회합니다\n' + \
-            '*!강등 @아이디 등급* 당원을 강등합니다\n' + \
-            '*!승급 @아이디 등급* 당원을 승급합니다\n' + \
-            '*!삭제 @아이디* 당원 등급을 삭제합니다' + \
-            '*!명언* 오늘의 명언을 출력합니다'
+        message = help_message(event.message.text)
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
     splitted = event.message.text.split()
