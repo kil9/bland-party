@@ -13,7 +13,7 @@ from linebot.models import (
 
 from config import app, r, line_bot_api, handler
 
-from utils import rreplace, load_ordered_dict
+from utils import rreplace
 
 
 ENTRY_RATINGS = 'ratings'
@@ -79,22 +79,16 @@ def extract_entry(event):
     return ENTRY_RATINGS + '_' + event.source.user_id
 
 
-def delete_entry(event):
-    r_entry = extract_entry(event)
-    ratings = load_ordered_dict(r_entry)
-
+def delete_entry(ratings, event):
     splitted = event.message.text.split()
     if len(splitted) < 2:
-        app.logger.warn('too short message to demote')
+        print('[WARN] too short message to demote')
         return
 
     to_delete = splitted[1]
     if to_delete in ratings:
         del ratings[to_delete]
         message = '삭제되었습니다 😌'
-
-        ratings_entry = json.dumps(ratings)
-        r.set(r_entry, ratings_entry)
     else:
         message = '삭제할 수 없습니다 😵'
 
@@ -102,7 +96,7 @@ def delete_entry(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def adjust_ranking(action, event):
+def adjust_ranking(ratings, action, event):
     '''
     ** event example **
     {"message": {"id": "9760259091048", "text": "text text", "type": "text"},
@@ -112,9 +106,6 @@ def adjust_ranking(action, event):
                 "userId": "U13990d12ea3aa82eef9e01fcea9a963f"},
      "timestamp": 1556272465993, "type": "message"}
      '''
-
-    r_entry = extract_entry(event)
-    ratings = load_ordered_dict(r_entry)
 
     splitted = event.message.text.split()
 
@@ -134,41 +125,30 @@ def adjust_ranking(action, event):
     if action == 'promote':
         ratings.move_to_end(to_adjust, last=False)
 
-    ratings_entry = json.dumps(ratings)
-    r.set(r_entry, ratings_entry)
-
     message = ratings_to_message(ratings)
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def show_ranking(event):
-    rating_key = extract_entry(event)
-    ratings = load_ordered_dict(rating_key)
+def show_ranking(ratings, event):
     message = ratings_to_message(ratings)
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def show_today_message(event):
-    group_id = event.source.group_id
-    group_key = '{}_{}'.format(ENTRY_GROUP, event.source.group_id)
-    member_info = load_ordered_dict(group_key)
-
+def show_today_message(member_info, event):
     filtered = filter(lambda x: 'message_today' in x[1], list(member_info.items()))
 
     user_id, user_info = random.choice(list(filtered))
+    group_id = event.source.group_id
     profile = line_bot_api.get_group_member_profile(group_id, user_id)
     message = '*오늘의 명언*\n\n'
     message += '{}: {}'.format(profile.display_name, user_info['message_today'])
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def show_frequency(event):
-    group_id = event.source.group_id
-    group_key = '{}_{}'.format(ENTRY_GROUP, event.source.group_id)
-    member_info = load_ordered_dict(group_key)
-
+def show_frequency(member_info, event):
     message_frequency = OrderedDict()
     for user_id, user_info in member_info.items():
+        group_id = event.source.group_id
         profile = line_bot_api.get_group_member_profile(group_id, user_id)
         message_frequency[profile.display_name] = user_info['n_message']
 
@@ -202,11 +182,8 @@ def has_to_change_message(entry, message):
     return False
 
 
-def message_preprocess(event):
-    group_key = '{}_{}'.format(ENTRY_GROUP, event.source.group_id)
-    member_info = load_ordered_dict(group_key)
+def message_preprocess(member_info, event):
     user_id = event.source.user_id
-
     message = event.message.text
     if user_id not in member_info:
         member_info[user_id] = {'n_message': 0, 'message_today': message}
@@ -215,28 +192,48 @@ def message_preprocess(event):
             member_info[user_id]['message_today'] = message
 
     member_info[user_id]['n_message'] += 1
-    member_info_serialized = json.dumps(member_info)
 
-    r.setex(group_key, 86400, member_info_serialized)
+
+def load_group_info(event):
+    member_key = '{}_{}'.format(ENTRY_GROUP, event.source.group_id)
+    ratings_key = '{}_{}'.format(ENTRY_RATINGS, event.source.group_id)
+
+    member_info_raw, ratings_info_raw = r.mget(member_key, ratings_key)
+
+    if member_info_raw is not None:
+        member_info = json.loads(member_info_raw, object_pairs_hook=OrderedDict)
+    else:
+        member_info = OrderedDict()
+
+    if ratings_info_raw is not None:
+        ratings_info = json.loads(ratings_info_raw, object_pairs_hook=OrderedDict)
+    else:
+        ratings_info = OrderedDict()
+
+    return member_info, ratings_info
+
+
+def save_group_info(member_info, ratings_info, event):
+    member_key = '{}_{}'.format(ENTRY_GROUP, event.source.group_id)
+    ratings_key = '{}_{}'.format(ENTRY_RATINGS, event.source.group_id)
+
+    member_info_serialized = json.dumps(member_info)
+    r.setex(member_key, 86400, member_info_serialized)
+
+    ratings_info_serialized = json.dumps(ratings_info)
+    r.setex(ratings_key, 14*86400, ratings_info_serialized)
 
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 
-    app.logger.info(event)
-    __import__('pprint').pprint(event)
-
-    if len(event.message.text) == 0:
-        app.logger.warn('too short message to split: ' + event.message.text)
+    if event.source.type != 'group':
         return
 
-    if event.source.type == 'group':
-        message_preprocess(event)
+    member_info, ratings_info = load_group_info(event)
 
-    if '!' in event.message.text:
-        app.logger.info(event)
+    message_preprocess(member_info, event)
 
-    splitted = event.message.text.split()
     if '!도움' in event.message.text:
         message = '*demoter_bot*\n\n' + \
             '*!도움* 도움말 보기\n' + \
@@ -248,29 +245,21 @@ def handle_message(event):
             '*!명언* 오늘의 명언을 출력합니다'
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
-    if splitted[0] == '!reset':
-        r_entry = extract_entry(event)
-        r.delete(r_entry)
-        message = '리셋되었습니다'
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
-
+    splitted = event.message.text.split()
     if splitted[0] == '!삭제':
-        delete_entry(event)
+        delete_entry(ratings_info, event)
+    elif splitted[0] in ('!빈도', '!частота'):
+        show_frequency(member_info, event)
+    elif splitted[0] == '!강등':
+        adjust_ranking(ratings_info, 'demote', event)
+    elif splitted[0] == '!승급':
+        adjust_ranking(ratings_info, 'promote', event)
+    elif splitted[0] == '!등급':
+        show_ranking(ratings_info, event)
+    elif splitted[0] == '!명언':
+        show_today_message(member_info, event)
 
-    if splitted[0] in ('!빈도', '!частота'):
-        show_frequency(event)
-
-    if splitted[0] == '!강등':
-        adjust_ranking('demote', event)
-
-    if splitted[0] == '!승급':
-        adjust_ranking('promote', event)
-
-    if splitted[0] == '!등급':
-        show_ranking(event)
-
-    if splitted[0] == '!명언':
-        show_today_message(event)
+    save_group_info(member_info, ratings_info, event)
 
 
 if __name__ == "__main__":
