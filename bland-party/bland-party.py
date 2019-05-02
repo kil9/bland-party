@@ -222,6 +222,10 @@ def message_preprocess(event):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+
+    app.logger.info(event)
+    __import__('pprint').pprint(event)
+
     if len(event.message.text) == 0:
         app.logger.warn('too short message to split: ' + event.message.text)
         return
