@@ -98,6 +98,18 @@ def delete_entry(ratings, event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
+def roll(dc):
+    rolled = random.randint(1, 20)
+
+    message = '{} vs. DC {}\n'.format(rolled, dc)
+    if rolled >= dc:
+        message += '굴림에 성공했습니다.'
+    else:
+        message += '굴림에 실패했습니다.'
+
+    return rolled >= dc, message
+
+
 def adjust_ranking(ratings, action, event):
     '''
     ** event example **
@@ -120,6 +132,14 @@ def adjust_ranking(ratings, action, event):
         to_adjust = ' '.join(to_adjust)
         ranking_title = splitted[-1]
 
+    success, message = roll(8)
+
+    if not success:
+        group_id = event.source.group_id
+        user_id = event.source.user_id
+        profile = line_bot_api.get_group_member_profile(group_id, user_id)
+        to_adjust = '@' + profile.display_name
+
     if to_adjust in ratings:
         del ratings[to_adjust]
 
@@ -127,7 +147,7 @@ def adjust_ranking(ratings, action, event):
     if action == 'promote':
         ratings.move_to_end(to_adjust, last=False)
 
-    message = ratings_to_message(ratings)
+    message = ratings_to_message(ratings) + '\n\n' + message
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
