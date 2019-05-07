@@ -89,7 +89,7 @@ def delete_entry(ratings, event):
         print('[WARN] too short message to demote')
         return
 
-    to_delete = splitted[1]
+    to_delete = ' '.join(splitted[1:])
     if to_delete in ratings:
         del ratings[to_delete]
         message = '삭제되었습니다 {}'.format(EMOJI_SMILE)
