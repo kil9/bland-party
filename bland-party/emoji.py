@@ -1,0 +1,7 @@
+EMOJI_DICE = '🎲'
+EMOJI_SMILE = '😌'
+EMOJI_SORRY = '😵'
+
+EMOJI_1ST = '🥇'
+EMOJI_2ND = '🥈'
+EMOJI_3RD = '🥉'

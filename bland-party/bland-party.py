@@ -17,6 +17,8 @@ from utils import rreplace
 
 from help import help_message
 
+from emoji import EMOJI_DICE, EMOJI_SMILE, EMOJI_SORRY, EMOJI_1ST, EMOJI_2ND, EMOJI_3RD
+
 
 ENTRY_RATINGS = 'ratings'
 # ratings_{group_id}
@@ -90,9 +92,9 @@ def delete_entry(ratings, event):
     to_delete = splitted[1]
     if to_delete in ratings:
         del ratings[to_delete]
-        message = '삭제되었습니다 😌'
+        message = '삭제되었습니다 {}'.format(EMOJI_SMILE)
     else:
-        message = '삭제할 수 없습니다 😵'
+        message = '삭제할 수 없습니다 {}'.format(EMOJI_SORRY)
 
     message = ratings_to_message(ratings) + '\n\n' + message
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
@@ -101,7 +103,7 @@ def delete_entry(ratings, event):
 def roll(dc):
     rolled = random.randint(1, 20)
 
-    message = '🎲 {} vs. DC {}\n'.format(rolled, dc)
+    message = '{} {} vs. DC {}\n'.format(EMOJI_DICE, rolled, dc)
     if rolled >= dc:
         message += '굴림에 성공했습니다.'
     else:
@@ -184,9 +186,9 @@ def show_frequency(member_info, event):
 
     sum_messages = sum((m[1] for m in sorted_users))
 
-    message = '*오늘의 메시지 수 🎤*\n\n'
+    message = '*오늘의 메시지 수 *\n\n'
     for i, (user_name, frequency) in enumerate(sorted_users):
-        medals = {0: '🥇', 1: '🥈', 2: '🥉'}
+        medals = {0: EMOJI_1ST, 1: EMOJI_2ND, 2: EMOJI_3RD}
         if i in medals:
             message += '{} '.format(medals[i])
         message += '{0}: {1}회 ({2:.1f}%)\n'.format(
