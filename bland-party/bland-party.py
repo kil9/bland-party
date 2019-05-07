@@ -128,27 +128,29 @@ def adjust_ranking(ratings, action, event):
         return
 
     if len(splitted) >= 3:
-        to_adjust = splitted[1:-1]
-        to_adjust = ' '.join(to_adjust)
+        target = splitted[1:-1]
+        target = ' '.join(target)
         ranking_title = splitted[-1]
 
     message = ''
     if action == 'demote':
-        success, message = roll(10)
+        rank = list(ratings.keys()).index(target)
+        success, message = roll(13-rank)
+        group_id = event.source.group_id
+        user_id = event.source.user_id
         if not success:
-            group_id = event.source.group_id
-            user_id = event.source.user_id
             profile = line_bot_api.get_group_member_profile(group_id, user_id)
-            to_adjust = '@' + profile.display_name
+            target = '@' + profile.display_name
+        line_bot_api.push_message(group_id, TextSendMessage(text=message))
 
-    if to_adjust in ratings:
-        del ratings[to_adjust]
+    if target in ratings:
+        del ratings[target]
 
-    ratings[to_adjust] = ranking_title
+    ratings[target] = ranking_title
     if action == 'promote':
-        ratings.move_to_end(to_adjust, last=False)
+        ratings.move_to_end(target, last=False)
 
-    message = ratings_to_message(ratings) + '\n' + message
+    message = ratings_to_message(ratings)
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
