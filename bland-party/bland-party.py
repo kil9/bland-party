@@ -134,7 +134,10 @@ def adjust_ranking(ratings, action, event):
 
     message = ''
     if action == 'demote':
-        rank = list(ratings.keys()).index(target)
+        try:
+            rank = list(ratings.keys()).index(target)
+        except ValueError:
+            rank = 10
         success, message = roll(13-rank)
         group_id = event.source.group_id
         user_id = event.source.user_id
