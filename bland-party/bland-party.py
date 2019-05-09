@@ -120,7 +120,7 @@ def do_calculate_mod(rank, length):
     if rank < 3:
         return 3 - rank
     if rank >= length-3:
-        return 2*(2 - (length-1 - rank))
+        return 1 + 2 * (2 - (length-1 - rank))
     return 0
 
 
