@@ -100,19 +100,47 @@ def delete_entry(ratings, event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def roll(dc):
-    rolled = random.randint(1, 20)
+def roll(mod, dc):
+    rolled = random.randint(1, 20)  # d20
 
-    message = '{} {} vs. DC {}\n'.format(EMOJI_DICE, rolled, dc)
-    if rolled >= dc:
+    mod_str = ''
+    if mod != 0:
+        mod_str = ' ({0}{1:+d})'.format(rolled, mod)
+
+    message = '{} {}{} vs. DC {}\n'.format(EMOJI_DICE, rolled+mod, mod_str, dc)
+    if rolled+mod >= dc:
         message += '굴림에 성공했습니다.'
     else:
         message += '굴림에 실패했습니다.'
 
-    return rolled >= dc, message
+    return rolled+mod >= dc, message
 
 
-def adjust_ranking(ratings, action, event):
+def do_calculate_mod(rank, length):
+    if rank < 3:
+        return 3 - rank
+    if rank >= length-3:
+        return 2*(2 - (length-1 - rank))
+    return 0
+
+
+def calculate_mod(member_info, user_id):
+    message_frequency = OrderedDict()
+    for member_user_id, user_info in member_info.items():
+        message_frequency[member_user_id] = user_info['n_message']
+
+    sorted_users = sorted(message_frequency.items(), key=lambda m: m[1], reverse=True)
+
+    try:
+        freq_rank = list(u[0] for u in sorted_users).index(user_id)
+    except ValueError:
+        return 0
+
+    mod = do_calculate_mod(freq_rank, len(member_info))
+    return mod
+
+
+def adjust_ranking(ratings, member_info, action, event):
     '''
     ** event example **
     {"message": {"id": "9760259091048", "text": "text text", "type": "text"},
@@ -136,17 +164,18 @@ def adjust_ranking(ratings, action, event):
 
     message = ''
     if action == 'demote':
+        group_id, user_id = event.source.group_id, event.source.user_id
         try:
             rank = list(ratings.keys()).index(target)
         except ValueError:
             rank = 10
-        success, message = roll(13-rank)
-        group_id = event.source.group_id
-        user_id = event.source.user_id
+
+        mod = calculate_mod(member_info, user_id)
+
+        success, message = roll(mod, 13-rank)
         if not success:
             profile = line_bot_api.get_group_member_profile(group_id, user_id)
             target = '@' + profile.display_name
-        line_bot_api.push_message(group_id, TextSendMessage(text=message))
 
     if target in ratings:
         del ratings[target]
@@ -155,7 +184,7 @@ def adjust_ranking(ratings, action, event):
     if action == 'promote':
         ratings.move_to_end(target, last=False)
 
-    message = ratings_to_message(ratings)
+    message = ratings_to_message(ratings) + '\n' + message
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
@@ -186,13 +215,21 @@ def show_frequency(member_info, event):
 
     sum_messages = sum((m[1] for m in sorted_users))
 
-    message = '*오늘의 메시지 수 *\n\n'
+    message = '*오늘의 메시지 수({})*\n\n'.format(sum_messages)
     for i, (user_name, frequency) in enumerate(sorted_users):
         medals = {0: EMOJI_1ST, 1: EMOJI_2ND, 2: EMOJI_3RD}
+
+        mod = do_calculate_mod(i, len(member_info))
+        mod_str = ''
+        if mod > 0:
+            mod_str = '/+{}'.format(mod)
+        elif mod < 0:
+            mod_str = '/{}'.format(mod)
+
         if i in medals:
             message += '{} '.format(medals[i])
-        message += '{0}: {1}회 ({2:.1f}%)\n'.format(
-                user_name, frequency, frequency/sum_messages*100.0)
+        message += '{0}: {1}회 ({2:.1f}%{3})\n'.format(
+                user_name, frequency, frequency/sum_messages*100.0, mod_str)
 
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
@@ -256,7 +293,6 @@ def save_group_info(member_info, ratings_info, event):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-
     if event.source.type != 'group':
         return
 
@@ -274,9 +310,9 @@ def handle_message(event):
     elif splitted[0] in ('!빈도', '!частота'):
         show_frequency(member_info, event)
     elif splitted[0] == '!강등':
-        adjust_ranking(ratings_info, 'demote', event)
+        adjust_ranking(ratings_info, member_info, 'demote', event)
     elif splitted[0] == '!승급':
-        adjust_ranking(ratings_info, 'promote', event)
+        adjust_ranking(ratings_info, member_info, 'promote', event)
     elif splitted[0] == '!등급':
         show_ranking(ratings_info, event)
     elif splitted[0] == '!명언':
