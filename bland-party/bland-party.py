@@ -108,6 +108,15 @@ def roll(mod, dc):
         mod_str = ' ({0}{1:+d})'.format(rolled, mod)
 
     message = '{} {}{} vs. DC {}\n'.format(EMOJI_DICE, rolled+mod, mod_str, dc)
+
+    if rolled == 20:
+        message += '*크리티컬* 굴림에 성공했습니다.'
+        return True, message
+
+    if rolled == 1:
+        message += '*펌블* 굴림에 실패했습니다.'
+        return False, message
+
     if rolled+mod >= dc:
         message += '굴림에 성공했습니다.'
     else:
