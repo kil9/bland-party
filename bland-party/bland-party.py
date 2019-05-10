@@ -312,6 +312,24 @@ def handle_message(event):
     if '!도움' in event.message.text:
         message = help_message(event.message.text)
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+        return
+
+    if event.message.text == '오오':
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text='해해'))
+        return
+
+    if event.message.text == '해해':
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text='성성'))
+        return
+
+    if '허..' in event.message.text:
+        message = random.choice(('원..', '인..'))
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+        return
+
+    if event.message.text in ('원..', '인..'):
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text='영..'))
+        return
 
     splitted = event.message.text.split()
     if splitted[0] == '!삭제':
