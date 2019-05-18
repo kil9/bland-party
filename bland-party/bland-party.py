@@ -13,7 +13,7 @@ from linebot.models import (
 
 from config import app, r, line_bot_api, handler
 
-from utils import rreplace
+from utils import rreplace, get_score
 
 from help import help_message
 
@@ -300,6 +300,21 @@ def save_group_info(member_info, ratings_info, event):
     r.setex(ratings_key, 14*86400, ratings_info_serialized)
 
 
+def do_versus(event):
+    splitted = event.message.text.split(' vs. ')
+    if len(splitted) < 2:
+        return
+
+    ranked = ((word, get_score(word)) for word in splitted)
+    rank_sorted = sorted(ranked, key=lambda m: m[1], reverse=True)
+
+    message = ''
+    for i, (word, score) in enumerate(rank_sorted):
+        winner = '' if i > 0 else ' (winner)'
+        message += '{}. {} ({}){}\n'.format(i+1, word, score, winner)
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     if event.source.type != 'group':
@@ -312,6 +327,10 @@ def handle_message(event):
     if '!도움' in event.message.text:
         message = help_message(event.message.text)
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+        return
+
+    if ' vs. ' in event.message.text:
+        do_versus(event)
         return
 
     if event.message.text == '오오':
