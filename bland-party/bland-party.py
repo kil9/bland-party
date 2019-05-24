@@ -171,26 +171,29 @@ def adjust_ranking(ratings, member_info, action, event):
         target = ' '.join(target)
         ranking_title = splitted[-1]
 
+    group_id, user_id = event.source.group_id, event.source.user_id
+    try:
+        rank = list(ratings.keys()).index(target)
+    except ValueError:
+        rank = 10
+    mod = calculate_mod(member_info, user_id)
+
     message = ''
     if action == 'demote':
-        group_id, user_id = event.source.group_id, event.source.user_id
-        try:
-            rank = list(ratings.keys()).index(target)
-        except ValueError:
-            rank = 10
-
-        mod = calculate_mod(member_info, user_id)
-
-        success, message = roll(mod, 13-rank)
+        success, message = roll(mod, max(1, 13-rank))
         if not success:
             profile = line_bot_api.get_group_member_profile(group_id, user_id)
             target = '@' + profile.display_name
 
-    if target in ratings:
-        del ratings[target]
+        ratings[target] = ranking_title
+        ratings.move_to_end(target)
 
-    ratings[target] = ranking_title
     if action == 'promote':
+        success, message = roll(mod, max(1, 13-rank))
+        if not success:
+            profile = line_bot_api.get_group_member_profile(group_id, user_id)
+            target = '@' + profile.display_name
+
         idx = list(ratings.keys()).index(target)
         move_index = max(idx - 1, 0)
 
@@ -198,11 +201,9 @@ def adjust_ranking(ratings, member_info, action, event):
         target_item = rating_list[idx]
         rating_list = rating_list[:idx] + rating_list[idx+1:]
         rating_list.insert(move_index, target_item)
-        ratings_tobe = OrderedDict()
+        ratings = OrderedDict()
         for k, v in rating_list:
-            ratings_tobe[k] = v
-        print(ratings)
-        print(ratings_tobe)
+            ratings[k] = v
 
     message = ratings_to_message(ratings) + '\n' + message
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
