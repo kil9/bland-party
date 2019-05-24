@@ -191,7 +191,18 @@ def adjust_ranking(ratings, member_info, action, event):
 
     ratings[target] = ranking_title
     if action == 'promote':
-        ratings.move_to_end(target, last=False)
+        idx = list(ratings.keys()).index(target)
+        move_index = max(idx - 1, 0)
+
+        rating_list = list(ratings.items())
+        target_item = rating_list[idx]
+        rating_list = rating_list[:idx] + rating_list[idx+1:]
+        rating_list.insert(move_index, target_item)
+        ratings_tobe = OrderedDict()
+        for k, v in rating_list:
+            ratings_tobe[k] = v
+        print(ratings)
+        print(ratings_tobe)
 
     message = ratings_to_message(ratings) + '\n' + message
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
