@@ -194,6 +194,8 @@ def adjust_ranking(ratings, member_info, action, event):
             profile = line_bot_api.get_group_member_profile(group_id, user_id)
             target = '@' + profile.display_name
 
+        ratings[target] = ranking_title
+
         idx = list(ratings.keys()).index(target)
         move_index = max(idx - 1, 0)
 
@@ -201,7 +203,7 @@ def adjust_ranking(ratings, member_info, action, event):
         target_item = rating_list[idx]
         rating_list = rating_list[:idx] + rating_list[idx+1:]
         rating_list.insert(move_index, target_item)
-        ratings = OrderedDict()
+        ratings.clear()
         for k, v in rating_list:
             ratings[k] = v
 
