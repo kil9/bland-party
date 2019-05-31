@@ -8,7 +8,7 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
+    MessageEvent, TextMessage, TextSendMessage, ImageSendMessage,
 )
 
 from config import app, r, line_bot_api, handler
@@ -18,6 +18,8 @@ from utils import rreplace, get_score
 from help import help_message
 
 from emoji import EMOJI_DICE, EMOJI_SMILE, EMOJI_SORRY, EMOJI_1ST, EMOJI_2ND, EMOJI_3RD
+
+from images import get_special_images
 
 
 ENTRY_RATINGS = 'ratings'
@@ -111,18 +113,18 @@ def roll(mod, dc):
 
     if rolled == 20:
         message += '*크리티컬* 굴림에 성공했습니다.'
-        return True, message
+        return True, message, 'critical'
 
     if rolled == 1:
         message += '*펌블* 굴림에 실패했습니다.'
-        return False, message
+        return False, message, 'fumble'
 
     if rolled+mod >= dc:
         message += '굴림에 성공했습니다.'
     else:
         message += '굴림에 실패했습니다.'
 
-    return rolled+mod >= dc, message
+    return rolled+mod >= dc, message, ''
 
 
 def do_calculate_mod(rank, length):
@@ -179,8 +181,9 @@ def adjust_ranking(ratings, member_info, action, event):
     mod = calculate_mod(member_info, user_id)
 
     message = ''
+    special = ''
     if action == 'demote':
-        success, message = roll(mod, max(1, 13-rank))
+        success, message, special = roll(mod, max(1, 13-rank))
         if not success:
             profile = line_bot_api.get_group_member_profile(group_id, user_id)
             target = '@' + profile.display_name
@@ -189,7 +192,7 @@ def adjust_ranking(ratings, member_info, action, event):
         ratings.move_to_end(target)
 
     if action == 'promote':
-        success, message = roll(mod, max(1, 13-rank))
+        success, message, special = roll(mod, max(1, 13-rank))
         if not success:
             profile = line_bot_api.get_group_member_profile(group_id, user_id)
             target = '@' + profile.display_name
@@ -208,7 +211,15 @@ def adjust_ranking(ratings, member_info, action, event):
             ratings[k] = v
 
     message = ratings_to_message(ratings) + '\n' + message
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+    text_message = TextSendMessage(text=message)
+    messages = [text_message]
+    if special in ('critical', 'fumble'):
+        special_image = get_special_images(special)
+        message = ImageSendMessage(
+                original_content_url=special_image, preview_image_url=special_image)
+        messages.append(message)
+
+    line_bot_api.reply_message(event.reply_token, messages)
 
 
 def show_ranking(ratings, event):
