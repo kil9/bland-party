@@ -4,9 +4,10 @@ import random
 def get_special_images(special: str) -> str:
     IMAGES = {
         'fumble': (
-            'https://saveversus.files.wordpress.com/2014/09/missed.jpg',
-            'https://i.kym-cdn.com/entries/icons/mobile/000/000/028/Fail-Stamp-Transparent_copy.jpg',
-            'https://cgaseyer.files.wordpress.com/2011/12/epic-fail-demotivational-poster-1220242871.jpg',
+            # 'https://saveversus.files.wordpress.com/2014/09/missed.jpg',
+            # 'https://i.kym-cdn.com/entries/icons/mobile/000/000/028/Fail-Stamp-Transparent_copy.jpg',
+            # 'https://cgaseyer.files.wordpress.com/2011/12/epic-fail-demotivational-poster-1220242871.jpg',
+            'http://file3.instiz.net/data/file3/2018/03/16/2/a/7/2a728ebac4f5292ca61cef0bc122b31d.gif',
             ),
         'critical': (
             'https://img.insight.co.kr/static/2017/05/22/700/21dj9r72yx01d4p9ii9x.jpg',
