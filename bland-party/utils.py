@@ -9,4 +9,7 @@ def get_score(word: str):
     o = 0
     for c in digest:
         o += ord(c)
-    return o % 100
+    out = o % 100
+    if out == 0:
+        out = 100
+    return out
