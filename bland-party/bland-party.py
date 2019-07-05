@@ -71,10 +71,13 @@ def callback():
     return 'OK'
 
 
-def ratings_to_message(ratings):
+def ratings_to_message(ratings, target=None, old_rating=None):
     str = ''
     for person, rating in ratings.items():
-        str += '{} {}\n'.format(person, rating)
+        if person == target:
+            str += '{} {} → {}\n'.format(person, old_rating, rating)
+        else:
+            str += '{} {}\n'.format(person, rating)
     rreplace(str, '\n', '', 1)
     return str
 
@@ -182,12 +185,15 @@ def adjust_ranking(ratings, member_info, action, event):
 
     message = ''
     special = ''
+    old_rating = ''
     if action == 'demote':
         success, message, special = roll(mod, max(1, 13-rank))
         if not success:
             profile = line_bot_api.get_group_member_profile(group_id, user_id)
             target = '@' + profile.display_name
 
+        if target in ratings:
+            old_rating = ratings[target]
         ratings[target] = ranking_title
         ratings.move_to_end(target)
 
@@ -197,6 +203,8 @@ def adjust_ranking(ratings, member_info, action, event):
             profile = line_bot_api.get_group_member_profile(group_id, user_id)
             target = '@' + profile.display_name
 
+        if target in ratings:
+            old_rating = ratings[target]
         ratings[target] = ranking_title
 
         idx = list(ratings.keys()).index(target)
@@ -210,7 +218,7 @@ def adjust_ranking(ratings, member_info, action, event):
         for k, v in rating_list:
             ratings[k] = v
 
-    message = ratings_to_message(ratings) + '\n' + message
+    message = ratings_to_message(ratings, target, old_rating) + '\n' + message
     text_message = TextSendMessage(text=message)
     messages = [text_message]
     if special in ('critical', 'fumble'):
