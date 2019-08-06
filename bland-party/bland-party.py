@@ -248,7 +248,15 @@ def show_today_message(member_info, event):
 
 def roll_dice(event):
     last_word = event.message.text.split()[-1]
-    x, y = last_word.split('d')
+    splitted = last_word.split('d')
+    if len(splitted) == 1:
+        x = 1
+        y = splitted[0]
+    else:
+        x, y = last_word.split('d')
+
+    if y == '%':
+        y = 100
 
     rolls = []
     for i in range(int(x)):
