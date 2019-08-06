@@ -246,6 +246,21 @@ def show_today_message(member_info, event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
+def roll_dice(event):
+    last_word = event.message.text.split()[-1]
+    x, y = last_word.split('d')
+
+    rolls = []
+    for i in range(int(x)):
+        rolls.append(random.randint(1, int(y)))
+
+    total = sum(rolls)
+    total_string = ' '.join((str(r) for r in rolls))
+    message = '결과: {} ({})'.format(total, total_string)
+
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+
 def show_frequency(member_info, event):
     message_frequency = OrderedDict()
     for user_id, user_info in member_info.items():
@@ -387,6 +402,8 @@ def handle_message(event):
         show_ranking(ratings_info, event)
     elif splitted[0] == '!명언':
         show_today_message(member_info, event)
+    elif splitted[0] == '!roll':
+        roll_dice(event)
 
     save_group_info(member_info, ratings_info, event)
 
