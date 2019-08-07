@@ -402,7 +402,7 @@ def handle_message(event):
         delete_entry(ratings_info, event)
     elif splitted[0] in ('!빈도', '!частота'):
         show_frequency(member_info, event)
-    elif splitted[0] == '!강등':
+    elif splitted[0] in ('!강등', '!불매'):
         adjust_ranking(ratings_info, member_info, 'demote', event)
     elif splitted[0] == '!승급':
         adjust_ranking(ratings_info, member_info, 'promote', event)
