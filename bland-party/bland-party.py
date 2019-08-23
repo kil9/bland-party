@@ -114,7 +114,7 @@ def roll(mod, dc):
 
     message = '{} {}{} vs. DC {}\n'.format(EMOJI_DICE, rolled+mod, mod_str, dc)
 
-    if rolled >= 19:
+    if rolled >= 19 or rolled+mod == dc:
         message += '*크리티컬* 굴림에 성공했습니다.'
         return True, message, 'critical'
 
