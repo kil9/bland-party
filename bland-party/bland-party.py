@@ -114,7 +114,7 @@ def roll(mod, dc):
 
     message = '{} {}{} vs. DC {}\n'.format(EMOJI_DICE, rolled+mod, mod_str, dc)
 
-    if rolled == 20:
+    if rolled >= 19:
         message += '*크리티컬* 굴림에 성공했습니다.'
         return True, message, 'critical'
 
@@ -195,7 +195,19 @@ def adjust_ranking(ratings, member_info, action, event):
         if target in ratings:
             old_rating = ratings[target]
         ratings[target] = ranking_title
-        ratings.move_to_end(target)
+
+        idx = list(ratings.keys()).index(target)
+        move_index = min(idx + 1, len(ratings)-1)
+        if special in ('critical', 'fumble'):
+            move_index = len(ratings)-1
+
+        rating_list = list(ratings.items())
+        target_item = rating_list[idx]
+        rating_list = rating_list[:idx] + rating_list[idx+1:]
+        rating_list.insert(move_index, target_item)
+        ratings.clear()
+        for k, v in rating_list:
+            ratings[k] = v
 
     if action == 'promote':
         success, message, special = roll(mod, max(1, 13-rank))
@@ -209,6 +221,8 @@ def adjust_ranking(ratings, member_info, action, event):
 
         idx = list(ratings.keys()).index(target)
         move_index = max(idx - 1, 0)
+        if special == 'critical':
+            move_index = 0
 
         rating_list = list(ratings.items())
         target_item = rating_list[idx]
