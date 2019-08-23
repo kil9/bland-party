@@ -4,19 +4,16 @@ import random
 def get_special_images(special: str) -> str:
     IMAGES = {
         'fumble': (
-            # 'https://saveversus.files.wordpress.com/2014/09/missed.jpg',
-            # 'https://i.kym-cdn.com/entries/icons/mobile/000/000/028/Fail-Stamp-Transparent_copy.jpg',
-            # 'https://cgaseyer.files.wordpress.com/2011/12/epic-fail-demotivational-poster-1220242871.jpg',
             'https://pbs.twimg.com/media/DnbsBXgVAAEElMT.jpg',
-            'http://file3.instiz.net/data/file3/2018/03/16/2/a/7/2a728ebac4f5292ca61cef0bc122b31d.gif',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQX9WrbDwJ8p24u5HsnOmxJMSKac2KnWVPTmvWQzG_fXoN52pID',
+            'https://mblogthumb-phinf.pstatic.net/MjAxODA1MjRfMjAy/MDAxNTI3MTQ3MzQwMjg0.HZ_q7z0I7ojg0tyrNGk5iu73BNRPraR2xD6UOmYXH_Eg.Afw1a3P8cXsKXnnYjIdBYFqDELJ6RpHJuNu9Eafj_Ikg.JPEG.vvso2vv/1527147320273.jpg?type=w800',
+            'https://pbs.twimg.com/media/ECfvK_cU0AERZsO?format=jpg&name=large',
+            'https://cdn.clien.net/web/api/file/F01/4346589/301a6a44b7e246fc922.JPG',
             ),
         'critical': (
             'https://img.insight.co.kr/static/2017/05/22/700/21dj9r72yx01d4p9ii9x.jpg',
-            # 'https://t1.daumcdn.net/cfile/tistory/223F70475298764C32',
-            # 'https://cdn.pixabay.com/photo/2017/12/20/07/04/portrait-of-a-rock-kestrel-3029352_960_720.jpg',
-            # 'https://image.fmkorea.com/files/attach/new/20170830/486616/751718523/760666026/e52694b85b51532def522fb9a667e8df.jpg',
-            # 'https://opgg-com-image.akamaized.net/attach/images/20181121064523.641956.jpeg',
-            'https://pbs.twimg.com/media/DnbsBXgVAAEElMT.jpg',
+            'https://image.fmkorea.com/files/attach/new/20180609/486616/848139831/1095267532/3020853034a1b9c9180cab842acfd742.JPEG',
+            'https://pbs.twimg.com/media/C_3kSnxVwAAqf2Q?format=jpg&name=large',
             ),
         }
 
