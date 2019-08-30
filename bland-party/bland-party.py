@@ -186,8 +186,12 @@ def adjust_ranking(ratings, member_info, action, event):
     message = ''
     special = ''
     old_rating = ''
-    if action == 'demote':
-        success, message, special = roll(mod, max(1, 13-rank))
+    if action in ('demote', 'super_demote'):
+        if action == 'super_demote':
+            success, message, special = roll(mod, max(1, 13-rank+5))
+        else:
+            success, message, special = roll(mod, max(1, 13-rank))
+
         if not success:
             profile = line_bot_api.get_group_member_profile(group_id, user_id)
             target = '@' + profile.display_name
@@ -198,7 +202,7 @@ def adjust_ranking(ratings, member_info, action, event):
 
         idx = list(ratings.keys()).index(target)
         move_index = min(idx + 1, len(ratings)-1)
-        if special in ('critical', 'fumble'):
+        if special in ('critical', 'fumble') or action == 'super_demote':
             move_index = len(ratings)-1
 
         rating_list = list(ratings.items())
@@ -418,6 +422,8 @@ def handle_message(event):
         show_frequency(member_info, event)
     elif splitted[0] in ('!강등', '!불매'):
         adjust_ranking(ratings_info, member_info, 'demote', event)
+    elif splitted[0] in ('!초강등'):
+        adjust_ranking(ratings_info, member_info, 'super_demote', event)
     elif splitted[0] == '!승급':
         adjust_ranking(ratings_info, member_info, 'promote', event)
     elif splitted[0] == '!등급':
