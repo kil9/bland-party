@@ -13,3 +13,14 @@ def get_score(word: str):
     if out == 0:
         out = 100
     return out
+
+def moved_step_str(old: int, new: int):
+    moved = abs(new - old)
+    if old > new:
+        arrow = '↑'
+    elif old < new:
+        arrow = '↓'
+    else:
+        arrow = '→'
+
+    return f'({arrow}{moved})'

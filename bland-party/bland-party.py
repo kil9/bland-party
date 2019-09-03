@@ -13,7 +13,7 @@ from linebot.models import (
 
 from config import app, r, line_bot_api, handler
 
-from utils import rreplace, get_score
+from utils import rreplace, get_score, moved_step_str
 
 from help import help_message
 
@@ -71,11 +71,11 @@ def callback():
     return 'OK'
 
 
-def ratings_to_message(ratings, target=None, old_rating=None):
+def ratings_to_message(ratings, target=None, old_rating=None, moved_steps=''):
     str = ''
     for person, rating in ratings.items():
         if person == target:
-            str += '{} {} → {}\n'.format(person, old_rating, rating)
+            str += '{} {} → {} {}\n'.format(person, old_rating, rating, moved_steps)
         else:
             str += '{} {}\n'.format(person, rating)
     rreplace(str, '\n', '', 1)
@@ -186,6 +186,7 @@ def adjust_ranking(ratings, member_info, action, event):
     message = ''
     special = ''
     old_rating = ''
+    moved_steps = ''
     if action in ('demote', 'super_demote'):
         if action == 'super_demote':
             success, message, special = roll(mod, max(1, 13-rank+5))
@@ -204,6 +205,8 @@ def adjust_ranking(ratings, member_info, action, event):
         move_index = min(idx + 1, len(ratings)-1)
         if special in ('critical', 'fumble') or action == 'super_demote':
             move_index = len(ratings)-1
+
+        moved_steps = moved_step_str(idx, move_index)
 
         rating_list = list(ratings.items())
         target_item = rating_list[idx]
@@ -228,6 +231,8 @@ def adjust_ranking(ratings, member_info, action, event):
         if special == 'critical':
             move_index = 0
 
+        moved_steps = moved_step_str(idx, move_index)
+
         rating_list = list(ratings.items())
         target_item = rating_list[idx]
         rating_list = rating_list[:idx] + rating_list[idx+1:]
@@ -236,7 +241,7 @@ def adjust_ranking(ratings, member_info, action, event):
         for k, v in rating_list:
             ratings[k] = v
 
-    message = ratings_to_message(ratings, target, old_rating) + '\n' + message
+    message = ratings_to_message(ratings, target, old_rating, moved_steps) + '\n' + message
     text_message = TextSendMessage(text=message)
     messages = [text_message]
     if special in ('critical', 'fumble'):
