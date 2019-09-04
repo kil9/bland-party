@@ -16,6 +16,7 @@ def get_special_images(special: str) -> str:
             'https://image.fmkorea.com/files/attach/new/20180609/486616/848139831/1095267532/3020853034a1b9c9180cab842acfd742.JPEG',
             'https://pbs.twimg.com/media/C_3kSnxVwAAqf2Q?format=jpg&name=large',
             'https://pbs.twimg.com/media/DQYKxpsV4AE2QXv.jpg',
+            'https://pbs.twimg.com/media/EDiDW6FUUAAN2X2?format=jpg&name=large',
             ),
         }
 
