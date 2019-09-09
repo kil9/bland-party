@@ -427,7 +427,7 @@ def handle_message(event):
         show_frequency(member_info, event)
     elif splitted[0] in ('!강등', '!불매'):
         adjust_ranking(ratings_info, member_info, 'demote', event)
-    elif splitted[0] in ('!초강등'):
+    elif splitted[0] == '!초강등':
         adjust_ranking(ratings_info, member_info, 'super_demote', event)
     elif splitted[0] == '!승급':
         adjust_ranking(ratings_info, member_info, 'promote', event)
