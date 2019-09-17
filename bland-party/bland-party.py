@@ -399,6 +399,11 @@ def handle_message(event):
     if event.source.type != 'group':
         return
 
+    if event.message.type == 'image':
+        print('image')
+
+    print('type:', event.message.type)
+
     member_info, ratings_info = load_group_info(event)
 
     message_preprocess(member_info, event)
