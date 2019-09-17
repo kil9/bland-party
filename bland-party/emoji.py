@@ -5,3 +5,5 @@ EMOJI_SORRY = '😵'
 EMOJI_1ST = '🥇'
 EMOJI_2ND = '🥈'
 EMOJI_3RD = '🥉'
+
+EMOJI_ROBOT = '🤖'

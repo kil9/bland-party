@@ -14,7 +14,7 @@ from linebot.models import (
 from config import app, r, line_bot_api, handler
 from utils import rreplace, get_score, moved_step_str
 from help import help_message
-from emoji import EMOJI_DICE, EMOJI_SMILE, EMOJI_SORRY, EMOJI_1ST, EMOJI_2ND, EMOJI_3RD
+from emoji import EMOJI_DICE, EMOJI_SMILE, EMOJI_SORRY, EMOJI_1ST, EMOJI_2ND, EMOJI_3RD, EMOJI_ROBOT
 from images import get_special_images
 from vision import detect_labels
 
@@ -414,7 +414,8 @@ def handle_image_message(event):
     for label in labels:
         for key, translated in LABELS.items():
             if key == label.description:
-                message = '분석결과 {0}일 확률은 {1:.2f}%입니다.'.format(translated, label.score*100)
+                message = '{0} 분석결과 {1}일 확률은 {2:.2f}%입니다.'.format(
+                        EMOJI_ROBOT, translated, label.score*100)
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
     return
