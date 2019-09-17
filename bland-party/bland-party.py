@@ -8,18 +8,15 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage, ImageSendMessage,
+    MessageEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage,
 )
 
 from config import app, r, line_bot_api, handler
-
 from utils import rreplace, get_score, moved_step_str
-
 from help import help_message
-
 from emoji import EMOJI_DICE, EMOJI_SMILE, EMOJI_SORRY, EMOJI_1ST, EMOJI_2ND, EMOJI_3RD
-
 from images import get_special_images
+from vision import detect_labels
 
 
 ENTRY_RATINGS = 'ratings'
@@ -392,6 +389,35 @@ def do_versus(event):
         winner = '' if i > 0 else ' (winner)'
         message += '{}. {} ({}){}\n'.format(i+1, word, score, winner)
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+
+@handler.add(MessageEvent, message=ImageMessage)
+def handle_image_message(event):
+    message_id = event.message.id
+    message_content = line_bot_api.get_message_content(message_id)
+
+    with open('tmp.jpg', 'wb') as fd:
+        for chunk in message_content.iter_content():
+            fd.write(chunk)
+
+    labels = detect_labels('tmp.jpg')
+
+    LABELS = {
+            'Food': '음식',
+            'Dog': '개',
+            'Cat': '고양이',
+    }
+
+    for label in labels:
+        print('{}: {}'.format(label.description, label.score))
+
+    for label in labels:
+        for key, translated in LABELS.items():
+            if key == label.description:
+                message = '분석결과 {0}일 확률은 {1:.2f}%입니다.'.format(translated, label.score*100)
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+    return
 
 
 @handler.add(MessageEvent, message=TextMessage)
