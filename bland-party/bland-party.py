@@ -173,6 +173,9 @@ def adjust_ranking(ratings, member_info, action, event):
         target = ' '.join(target)
         ranking_title = splitted[-1]
 
+    if target == '랜덤':
+        target = random.choice(tuple(ratings.keys()))
+
     group_id, user_id = event.source.group_id, event.source.user_id
     try:
         rank = list(ratings.keys()).index(target)
