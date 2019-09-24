@@ -409,6 +409,7 @@ def handle_image_message(event):
             'Food': '음식',
             'Dog': '개',
             'Cat': '고양이',
+            'Drink': '음료',
     }
 
     for label in labels:
