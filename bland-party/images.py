@@ -10,6 +10,8 @@ def get_special_images(special: str) -> str:
             'https://pbs.twimg.com/media/ECfvK_cU0AERZsO?format=jpg&name=large',
             'https://cdn.clien.net/web/api/file/F01/4346589/301a6a44b7e246fc922.JPG',
             'https://pbs.twimg.com/media/EBhxMOnUYAAOo-g?format=jpg&name=small',
+            'https://ext.fmkorea.com/files/attach/new/20180612/486616/1098240456/1101149921/8d45b0576f7c1c8a7bd7f2f2d54b8699.jpg',
+            'https://postfiles.pstatic.net/MjAxOTA1MTJfOTMg/MDAxNTU3NjY3MzM3NjI1.BzDjh7Mv8jmeL3sv-9GrJtpJ-Cl8EumNTCNR078s_SAg.87z2pokBaaH5lkidxAwibvjBiBTFM-I88jbilTtRGEQg.JPEG.jjyynr/2.jpg?type=w773',
             ),
         'critical': (
             'https://img.insight.co.kr/static/2017/05/22/700/21dj9r72yx01d4p9ii9x.jpg',
@@ -17,6 +19,7 @@ def get_special_images(special: str) -> str:
             'https://pbs.twimg.com/media/C_3kSnxVwAAqf2Q?format=jpg&name=large',
             'https://pbs.twimg.com/media/DQYKxpsV4AE2QXv.jpg',
             'https://pbs.twimg.com/media/EDiDW6FUUAAN2X2?format=jpg&name=large',
+            'https://opgg-com-image.akamaized.net/attach/images/20190616133629.752528.jpeg',
             ),
         }
 
