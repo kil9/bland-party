@@ -164,13 +164,17 @@ def adjust_ranking(ratings, member_info, action, event):
 
     splitted = event.message.text.split()
 
-    if len(splitted) < 3:
+    if len(splitted) < 2:
         app.logger.warn('too short message to promote/demote')
         return
 
     if len(splitted) >= 3:
         target = splitted[1:-1]
         target = ' '.join(target)
+        ranking_title = splitted[-1]
+
+    if len(splitted) == 2:
+        target = random.choice(tuple(ratings.keys()))
         ranking_title = splitted[-1]
 
     if target == '랜덤':
