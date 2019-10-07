@@ -9,10 +9,11 @@ def get_score(word: str):
     o = 0
     for c in digest:
         o += ord(c)
-    out = o % 100
+    out = o % 1000
     if out == 0:
-        out = 100
-    return out
+        out = 1000
+
+    return out/10.0
 
 def moved_step_str(old: int, new: int):
     moved = abs(new - old)
