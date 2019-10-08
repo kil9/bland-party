@@ -12,6 +12,8 @@ def get_special_images(special: str) -> str:
             'https://pbs.twimg.com/media/EBhxMOnUYAAOo-g?format=jpg&name=small',
             'https://ext.fmkorea.com/files/attach/new/20180612/486616/1098240456/1101149921/8d45b0576f7c1c8a7bd7f2f2d54b8699.jpg',
             'https://postfiles.pstatic.net/MjAxOTA1MTJfOTMg/MDAxNTU3NjY3MzM3NjI1.BzDjh7Mv8jmeL3sv-9GrJtpJ-Cl8EumNTCNR078s_SAg.87z2pokBaaH5lkidxAwibvjBiBTFM-I88jbilTtRGEQg.JPEG.jjyynr/2.jpg?type=w773',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTy2lCnqvYnPvjOp1Y0w1ABDdSchcKB0arqA8yRC1NAQUk_jKHs',
+            'http://cfs5.tistory.com/upload_control/download.blog?fhandle=YmxvZzEyNDc4OUBmczUudGlzdG9yeS5jb206L2F0dGFjaC8wLzAxMDAwMDAwMDA1Ni5qcGc%3D',
             ),
         'critical': (
             # 'https://img.insight.co.kr/static/2017/05/22/700/21dj9r72yx01d4p9ii9x.jpg',
@@ -23,6 +25,7 @@ def get_special_images(special: str) -> str:
             'https://i.pinimg.com/564x/c3/85/9b/c3859bc750bffe194e0bf912d234df53.jpg',
             'https://i.imgur.com/SpM5Chv.jpg',
             'https://i.pinimg.com/originals/a8/ab/b0/a8abb07aabf631065f727821f9eb81a4.jpg',
+            'https://image.fmkorea.com/files/attach/new/20180908/486616/944884088/1256967785/c1384c8976b775eddb246cc2f82082ff.png',
             ),
         }
 
