@@ -458,9 +458,9 @@ def handle_message(event):
     splitted = event.message.text.split()
     if splitted[0] == '!삭제':
         delete_entry(ratings_info, event)
-    elif splitted[0] in ('!빈도', '!частота'):
+    elif splitted[0] in ('!빈도', '!частота', '!頻度', '!ひんど'):
         show_frequency(member_info, event)
-    elif splitted[0] in ('!강등', '!불매'):
+    elif splitted[0] in ('!강등', '!불매', '!понижение', '!降等', '!降格', '!こうとう'):
         adjust_ranking(ratings_info, member_info, 'demote', event)
     elif splitted[0] == '!초강등':
         adjust_ranking(ratings_info, member_info, 'super_demote', event)
