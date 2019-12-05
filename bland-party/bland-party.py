@@ -151,7 +151,7 @@ def calculate_mod(member_info, user_id):
     return mod
 
 
-def adjust_ranking(ratings, member_info, action, event):
+def adjust_ranking(ratings, member_info, action, event, designated_target=None):
     '''
     ** event example **
     {"message": {"id": "9760259091048", "text": "text text", "type": "text"},
@@ -180,10 +180,18 @@ def adjust_ranking(ratings, member_info, action, event):
     if target == '랜덤':
         target = random.choice(tuple(ratings.keys()))
 
+    if designated_target is not None:
+        try:
+            target = tuple(ratings.keys())[designated_target]
+        except ValueError as e:
+            app.logger.error(e)
+            target = random.choice(tuple(ratings.keys()))
+
     group_id, user_id = event.source.group_id, event.source.user_id
     try:
         rank = list(ratings.keys()).index(target)
-    except ValueError:
+    except ValueError as e:
+        app.logger.error(e)
         rank = 10
     mod = calculate_mod(member_info, user_id)
 
@@ -447,14 +455,6 @@ def handle_message(event):
         do_versus(event)
         return
 
-    if event.message.text == '해해':
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text='성성'))
-        return
-
-    if event.message.text in ('원..', '인..'):
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text='영..'))
-        return
-
     splitted = event.message.text.split()
     if splitted[0] == '!삭제':
         delete_entry(ratings_info, event)
@@ -462,6 +462,8 @@ def handle_message(event):
         show_frequency(member_info, event)
     elif splitted[0] in ('!강등', '!불매', '!понижение', '!降等', '!降格', '!こうとう'):
         adjust_ranking(ratings_info, member_info, 'demote', event)
+    elif splitted[0] in ('!탄핵'):
+        adjust_ranking(ratings_info, member_info, 'demote', event, 0)
     elif splitted[0] == '!초강등':
         adjust_ranking(ratings_info, member_info, 'super_demote', event)
     elif splitted[0] == '!승급':
