@@ -470,7 +470,7 @@ def handle_message(event):
         adjust_ranking(ratings_info, member_info, 'promote', event)
     elif splitted[0] in ('!등급', '!ранг'):
         show_ranking(ratings_info, event)
-    elif splitted[0] in ('!명언', '!пословица'):
+    elif splitted[0] in ('!명언', '!망언', '!пословица'):
         show_today_message(member_info, event)
     elif splitted[0] == '!roll':
         roll_dice(event)
