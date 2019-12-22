@@ -396,7 +396,7 @@ def do_versus(event):
     if len(splitted) < 2:
         return
 
-    ranked = ((word, get_score(word)) for word in splitted)
+    ranked = ((word, get_score(word.strip())) for word in splitted)
     rank_sorted = sorted(ranked, key=lambda m: m[1], reverse=True)
 
     message = ''
