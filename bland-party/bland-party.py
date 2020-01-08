@@ -462,7 +462,7 @@ def handle_message(event):
         show_frequency(member_info, event)
     elif splitted[0] in ('!강등', '!불매', '!понижение', '!降等', '!降格', '!こうとう'):
         adjust_ranking(ratings_info, member_info, 'demote', event)
-    elif splitted[0] in ('!탄핵'):
+    elif splitted[0] == '!탄핵':
         adjust_ranking(ratings_info, member_info, 'demote', event, 0)
     elif splitted[0] == '!초강등':
         adjust_ranking(ratings_info, member_info, 'super_demote', event)
