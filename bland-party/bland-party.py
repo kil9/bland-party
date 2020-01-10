@@ -8,8 +8,10 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, ImageMessage, TextSendMessage, ImageSendMessage,
+    MessageEvent, TextMessage, TextSendMessage, ImageSendMessage,
 )
+
+import requests
 
 from config import app, r, line_bot_api, handler
 from utils import rreplace, get_score, moved_step_str
@@ -437,6 +439,29 @@ def handle_image_message(event):
     return
 
 
+def preview_lawtalk(event):
+    news_url = event.message.text.split('?')[0].split(' ')[0]
+    articleid = news_url.split('/')[-1]
+    url_prefix = 'https://rachelapi.lawtalk.co.kr/lawtalknews/api/v1/article/{}'
+    resp = requests.get(url_prefix.format(articleid))
+    if resp.status_code != 200:
+        app.logger.error('failed to request')
+        app.logger.error(resp.status_code)
+        app.logger.error(resp.text)
+        return
+    parsed = resp.json()
+    title = parsed['data']['article']['title']
+    image_url = parsed['data']['article']['titleImage']
+
+    text_message = TextSendMessage(text=title)
+    messages = [text_message]
+    message = ImageSendMessage(
+            original_content_url=news_url, preview_image_url=image_url)
+    messages.append(message)
+
+    line_bot_api.reply_message(event.reply_token, messages)
+
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     if event.source.type != 'group':
@@ -474,6 +499,8 @@ def handle_message(event):
         show_today_message(member_info, event)
     elif splitted[0] == '!roll':
         roll_dice(event)
+    elif 'https://news.lawtalk.co.kr' in event.message.text:
+        preview_lawtalk(event)
 
     save_group_info(member_info, ratings_info, event)
 
