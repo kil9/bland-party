@@ -26,6 +26,7 @@ def get_special_images(special: str) -> str:
             'https://i.imgur.com/SpM5Chv.jpg',
             'https://i.pinimg.com/originals/a8/ab/b0/a8abb07aabf631065f727821f9eb81a4.jpg',
             'https://image.fmkorea.com/files/attach/new/20180908/486616/944884088/1256967785/c1384c8976b775eddb246cc2f82082ff.png',
+            'https://www.dogdrip.net/dvs/c/20/01/12/282ced159f23c8ee93a25fa0b37f2f52.jpg',
             ),
         }
 
