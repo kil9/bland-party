@@ -495,7 +495,7 @@ def handle_message(event):
         adjust_ranking(ratings_info, member_info, 'demote', event, 0)
     elif splitted[0] == '!초강등':
         adjust_ranking(ratings_info, member_info, 'super_demote', event)
-    elif splitted[0] == '!승급':
+    elif splitted[0] in ('!승급', '!공천'):
         adjust_ranking(ratings_info, member_info, 'promote', event)
     elif splitted[0] in ('!등급', '!ранг'):
         show_ranking(ratings_info, event)
