@@ -16,13 +16,14 @@ def get_special_images(special: str) -> str:
             'https://pbs.twimg.com/media/DPeIbQLVAAA43sV?format=jpg&name=small',
             ),
         'critical': (
+            # 'https://i.pinimg.com/564x/c3/85/9b/c3859bc750bffe194e0bf912d234df53.jpg', # ride check
+            # 'https://i.imgur.com/SpM5Chv.jpg', # bluff
+            # 'https://i.pinimg.com/originals/a8/ab/b0/a8abb07aabf631065f727821f9eb81a4.jpg', # luck
+            # 'https://www.dogdrip.net/dvs/c/20/01/12/282ced159f23c8ee93a25fa0b37f2f52.jpg',
             'https://pbs.twimg.com/media/C_3kSnxVwAAqf2Q?format=jpg&name=large',
             'https://opgg-com-image.akamaized.net/attach/images/20190616133629.752528.jpeg',
-            'https://i.pinimg.com/564x/c3/85/9b/c3859bc750bffe194e0bf912d234df53.jpg',
-            'https://i.imgur.com/SpM5Chv.jpg',
-            'https://i.pinimg.com/originals/a8/ab/b0/a8abb07aabf631065f727821f9eb81a4.jpg',
             'https://image.fmkorea.com/files/attach/new/20180908/486616/944884088/1256967785/c1384c8976b775eddb246cc2f82082ff.png',
-            'https://www.dogdrip.net/dvs/c/20/01/12/282ced159f23c8ee93a25fa0b37f2f52.jpg',
+            'https://i1.ruliweb.com/img/19/12/05/16ed44590ad3623dd.jpg',
             ),
         }
 
