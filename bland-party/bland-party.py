@@ -466,6 +466,15 @@ def preview_lawtalk(event):
     line_bot_api.reply_message(event.reply_token, messages)
 
 
+def detect_fake(event):
+    seed = random.randint(0, 10)
+    if seed != 0:
+        return
+    text_message = TextSendMessage(text='{} 삐빅 가짜뉴스입니다'.format(EMOJI_ROBOT))
+    messages = [text_message]
+    line_bot_api.reply_message(event.reply_token, messages)
+
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     if event.source.type != 'group':
@@ -505,6 +514,8 @@ def handle_message(event):
         roll_dice(event)
     elif 'https://news.lawtalk.co.kr' in event.message.text:
         preview_lawtalk(event)
+    elif 'http' in event.message.text:
+        detect_fake(event)
 
     save_group_info(member_info, ratings_info, event)
 
