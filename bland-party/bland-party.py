@@ -1,5 +1,6 @@
 import json
 import random
+import datetime
 from collections import OrderedDict
 
 from flask import request, abort
@@ -475,6 +476,46 @@ def detect_fake(event):
     line_bot_api.reply_message(event.reply_token, messages)
 
 
+def detect_duplicates(member_info, event):
+    splits = event.message.text.split(' ')
+    for split in splits:
+        if split.startswith('http'):
+            link = split
+            break
+    else:
+        return False
+
+    group_id, user_id = event.source.group_id, event.source.user_id
+    rkey = '{}_{}'.format(group_id, link)
+
+    entry_serialized = r.get(rkey)
+    if entry_serialized is not None:
+        entry = json.loads(entry_serialized)
+
+        message = '{} 삐빅 중복입니다\nby {} ({})'.format(
+                EMOJI_ROBOT, entry['uploader'], entry['time'])
+        messages = [TextSendMessage(text=message)]
+        line_bot_api.reply_message(event.reply_token, messages)
+        return True
+
+    profile = line_bot_api.get_group_member_profile(group_id, user_id)
+    uploader = '@' + profile.display_name
+
+    entry = {
+        'uploader': uploader,
+        'time': datetime.datetime.now().strftime('%m/%d %H:%M'), }
+
+    entry_serialized = json.dumps(entry)
+    r.setex(rkey, 86400*3, entry_serialized)
+    return False
+
+
+def process_link(member_info, event):
+    replied = detect_duplicates(member_info, event)
+    if not replied:
+        detect_fake(event)
+
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     if event.source.type != 'group':
@@ -515,7 +556,7 @@ def handle_message(event):
     elif 'https://news.lawtalk.co.kr' in event.message.text:
         preview_lawtalk(event)
     elif 'http' in event.message.text:
-        detect_fake(event)
+        process_link(member_info, event)
 
     save_group_info(member_info, ratings_info, event)
 
