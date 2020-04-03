@@ -4,6 +4,7 @@ import datetime
 from collections import OrderedDict
 
 from flask import request, abort
+from pytz import timezone
 
 from linebot.exceptions import (
     InvalidSignatureError
@@ -501,9 +502,11 @@ def detect_duplicates(member_info, event):
     profile = line_bot_api.get_group_member_profile(group_id, user_id)
     uploader = '@' + profile.display_name
 
+    KST = timezone('Asia/Seoul')
+    d = datetime.datetime.now(tz=KST)
     entry = {
         'uploader': uploader,
-        'time': datetime.datetime.now().strftime('%m/%d %H:%M'), }
+        'time': d.strftime('%m/%d %H:%M'), }
 
     entry_serialized = json.dumps(entry)
     r.setex(rkey, 86400*3, entry_serialized)
