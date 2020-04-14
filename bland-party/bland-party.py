@@ -468,15 +468,6 @@ def preview_lawtalk(event):
     line_bot_api.reply_message(event.reply_token, messages)
 
 
-def detect_fake(event):
-    seed = random.randint(0, 10)
-    if seed != 0:
-        return
-    text_message = TextSendMessage(text='{} 삐빅 가짜뉴스입니다'.format(EMOJI_ROBOT))
-    messages = [text_message]
-    line_bot_api.reply_message(event.reply_token, messages)
-
-
 def detect_duplicates(member_info, event):
     splits = event.message.text.split(' ')
     for split in splits:
@@ -514,9 +505,7 @@ def detect_duplicates(member_info, event):
 
 
 def process_link(member_info, event):
-    replied = detect_duplicates(member_info, event)
-    if not replied:
-        detect_fake(event)
+    detect_duplicates(member_info, event)
 
 
 @handler.add(MessageEvent, message=TextMessage)
