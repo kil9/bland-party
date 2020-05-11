@@ -526,12 +526,18 @@ def handle_message(event):
         do_versus(event)
         return
 
+    demote_commands = (
+        '!강등',
+        '!불매', '!понижение', '!降等', '!降格', '!こうとう',
+        '!저격', '!낙선', '!낙천', '!세무조사',
+        '!기소', '!고소')
+
     splitted = event.message.text.split()
     if splitted[0] == '!삭제':
         delete_entry(ratings_info, event)
     elif splitted[0] in ('!빈도', '!частота', '!頻度', '!ひんど'):
         show_frequency(member_info, event)
-    elif splitted[0] in ('!강등', '!불매', '!понижение', '!降等', '!降格', '!こうとう', '!저격', '!낙선', '!낙천'):
+    elif splitted[0] in demote_commands:
         adjust_ranking(ratings_info, member_info, 'demote', event)
     elif splitted[0] == '!탄핵':
         adjust_ranking(ratings_info, member_info, 'demote', event, 0)
