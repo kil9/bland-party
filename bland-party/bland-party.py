@@ -45,9 +45,14 @@ def reset_group(group_id, is_key=False):
 
 @app.route("/groups", methods=['DELETE'])
 def reset_all_groups():
+    app.logger.info('reset_all_groups request')
     s, scanned = r.scan(0, ENTRY_GROUP + '*')
     group_ids = (b.decode('utf-8') for b in scanned)
+    app.logger.info('group_ids:')
+    app.logger.info(list(group_ids))
     for group_id in group_ids:
+        app.logger.info('group_id:')
+        app.logger.info(group_id)
         reset_group(group_id, is_key=True)
 
     return 'ok'
