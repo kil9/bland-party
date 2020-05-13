@@ -37,7 +37,7 @@ def reset_group(group_id, is_key=False):
         group_key = group_id
     else:
         group_key = '{}_{}'.format(ENTRY_GROUP, group_id)
-    app.logger.info('delete key: {}'.format(group_key))
+    app.logger.warn('deleting key: {}'.format(group_key))
     r.delete(group_key)
 
     return 'ok'
@@ -46,14 +46,9 @@ def reset_group(group_id, is_key=False):
 @app.route("/groups", methods=['DELETE'])
 def reset_all_groups():
     app.logger.info('reset_all_groups request')
-    s, scanned = r.scan(0, ENTRY_GROUP + '*')
-    group_ids = (b.decode('utf-8') for b in scanned)
-    app.logger.info('group_ids:')
-    app.logger.info(list(group_ids))
-    for group_id in group_ids:
-        app.logger.info('group_id:')
-        app.logger.info(group_id)
-        reset_group(group_id, is_key=True)
+    for key in r.scan_iter(match=ENTRY_GROUP + '*', count=100):
+        app.logger.info('deleting group_id: {}'.format(key))
+        reset_group(key, is_key=True)
 
     return 'ok'
 
