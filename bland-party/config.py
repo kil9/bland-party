@@ -1,5 +1,7 @@
 import os
 
+import logging
+
 import redis
 
 from flask import Flask
@@ -19,3 +21,4 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 r = redis.from_url(REDIS_URL)
 
 app = Flask(__name__)
+app.logger.setLevel(logging.INFO)
