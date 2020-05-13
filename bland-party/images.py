@@ -4,9 +4,7 @@ import random
 def get_special_images(special: str) -> str:
     IMAGES = {
         'fumble': (
-            'https://pbs.twimg.com/media/DnbsBXgVAAEElMT.jpg',
             'https://mblogthumb-phinf.pstatic.net/MjAxODA1MjRfMjAy/MDAxNTI3MTQ3MzQwMjg0.HZ_q7z0I7ojg0tyrNGk5iu73BNRPraR2xD6UOmYXH_Eg.Afw1a3P8cXsKXnnYjIdBYFqDELJ6RpHJuNu9Eafj_Ikg.JPEG.vvso2vv/1527147320273.jpg?type=w800',
-            'https://pbs.twimg.com/media/ECfvK_cU0AERZsO?format=jpg&name=large',
             'https://cdn.clien.net/web/api/file/F01/4346589/301a6a44b7e246fc922.JPG',
             'https://pbs.twimg.com/media/EBhxMOnUYAAOo-g?format=jpg&name=small',
             'https://ext.fmkorea.com/files/attach/new/20180612/486616/1098240456/1101149921/8d45b0576f7c1c8a7bd7f2f2d54b8699.jpg',
