@@ -532,10 +532,12 @@ def handle_message(event):
         '!저격', '!낙선', '!낙천', '!세무조사',
         '!기소', '!고소')
 
+    frequency_commands = ('!빈도', '!частота', '!頻度', '!ひんど')
+
     splitted = event.message.text.split()
     if splitted[0] == '!삭제':
         delete_entry(ratings_info, event)
-    elif splitted[0] in ('!빈도', '!частота', '!頻度', '!ひんど'):
+    elif splitted[0] in frequency_commands:
         show_frequency(member_info, event)
     elif splitted[0] in demote_commands:
         adjust_ranking(ratings_info, member_info, 'demote', event)
