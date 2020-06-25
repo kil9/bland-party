@@ -557,6 +557,10 @@ def handle_message(event):
         preview_lawtalk(event)
     elif 'http' in event.message.text:
         process_link(member_info, event)
+    elif event.message.text.startswith('힝') or event.message.text.endswith('힝'):
+        text_message = TextSendMessage(text='어른스럽게 말해야지')
+        messages = [text_message]
+        line_bot_api.reply_message(event.reply_token, messages)
 
     save_group_info(member_info, ratings_info, event)
 
