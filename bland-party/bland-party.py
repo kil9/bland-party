@@ -441,33 +441,6 @@ def handle_image_message(event):
     return
 
 
-def preview_lawtalk(event):
-    news_url = event.message.text.split('?')[0].split(' ')[0]
-    articleid = news_url.split('/')[-1]
-    url_prefix = 'https://rachelapi.lawtalk.co.kr/lawtalknews/api/v1/article/{}'
-    url = url_prefix.format(articleid)
-    app.logger.info('rachel url:')
-    app.logger.info(url)
-    resp = requests.get(url_prefix.format(articleid))
-    if resp.status_code != 200:
-        app.logger.error('failed to request')
-        app.logger.error(resp.status_code)
-        app.logger.error(resp.text)
-        return
-    parsed = resp.json()
-    title = parsed['data']['article']['title']
-    image_url = parsed['data']['article']['titleImage']
-
-    text_message = TextSendMessage(text=title)
-    messages = [text_message]
-    if image_url is not None:
-        message = ImageSendMessage(
-                original_content_url=news_url, preview_image_url=image_url)
-        messages.append(message)
-
-    line_bot_api.reply_message(event.reply_token, messages)
-
-
 def detect_duplicates(member_info, event):
     splits = event.message.text.split(' ')
     for split in splits:
@@ -553,8 +526,6 @@ def handle_message(event):
         show_today_message(member_info, event)
     elif splitted[0] == '!roll':
         roll_dice(event)
-    elif 'https://news.lawtalk.co.kr' in event.message.text:
-        preview_lawtalk(event)
     elif 'http' in event.message.text:
         process_link(member_info, event)
     elif event.message.text.startswith('힝') or event.message.text.endswith('힝'):
