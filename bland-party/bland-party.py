@@ -276,6 +276,7 @@ def check_imposter(event):
     splitted = event.message.text.split()
     if len(splitted) != 2:
         app.logger.warn('too short or long message to check imposter')
+        return
     target = ' '.join(splitted[1:]).replace('@', '')
 
     if random.randint(0, 3) == 0:
