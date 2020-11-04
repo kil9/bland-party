@@ -7,3 +7,4 @@ EMOJI_2ND = '🥈'
 EMOJI_3RD = '🥉'
 
 EMOJI_ROBOT = '🤖'
+EMOJI_BALANCE = '⚖️'

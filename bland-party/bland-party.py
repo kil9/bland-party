@@ -16,7 +16,8 @@ from linebot.models import (
 from config import app, r, line_bot_api, handler
 from utils import rreplace, get_score, moved_step_str
 from help import help_message
-from emoji import EMOJI_DICE, EMOJI_SMILE, EMOJI_SORRY, EMOJI_1ST, EMOJI_2ND, EMOJI_3RD, EMOJI_ROBOT
+from emoji import EMOJI_DICE, EMOJI_SMILE, EMOJI_SORRY, EMOJI_1ST, EMOJI_2ND, EMOJI_3RD
+from emoji import EMOJI_ROBOT, EMOJI_BALANCE
 from images import get_special_images
 from vision import detect_labels
 
@@ -269,6 +270,25 @@ def adjust_ranking(ratings, member_info, action, event, designated_target=None):
 
 def show_ranking(ratings, event):
     message = ratings_to_message(ratings)
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+
+def predict_verdict(event):
+    splitted = event.message.text.split()
+    if len(splitted) < 2:
+        app.logger.warn('too short message to verdict')
+        return
+
+    target = ' '.join(splitted[1:]).replace('@', '')
+    verdicts = [
+            '무죄', '징역 2년 집행유예 4년', '사형', '국종룸 24시간',
+            '징역 1년 집행유예 2년', '기소유예', '취업제한 5년',
+            '120시간 사회봉사', '신상공개 10년',
+            '훈방', '징역 30년', '징역 10년', '무죄',
+            '무기징역', '무죄', '무죄', '징역 1년', '벌금 300만원']
+    verdict = random.choice(verdicts)
+    message = '{0} *AI 형량 예측 결과*\n'.format(EMOJI_BALANCE) + \
+        f'{target}: {verdict}'
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
@@ -541,6 +561,8 @@ def handle_message(event):
         show_ranking(ratings_info, event)
     elif splitted[0] in ('!명언', '!망언', '!пословица'):
         show_today_message(member_info, event)
+    elif splitted[0] in ('!형량예측', '!형량'):
+        predict_verdict(event)
     elif splitted[0] == '!임포스터':
         check_imposter(event)
     elif splitted[0] == '!roll':
