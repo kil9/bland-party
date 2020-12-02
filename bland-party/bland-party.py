@@ -59,7 +59,6 @@ def callback():
 
     # get request body as text
     body = request.get_data(as_text=True)
-    app.logger.info("Request body: " + body)
 
     # handle webhook body
     try:
@@ -526,6 +525,8 @@ def handle_message(event):
     member_info, ratings_info = load_group_info(event)
 
     message_preprocess(member_info, event)
+
+    app.logger.info(f"group: {event.source.group_id}, text: {event.message.text}")
 
     if '!도움' in event.message.text:
         message = help_message(event.message.text)
