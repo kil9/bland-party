@@ -16,6 +16,7 @@ def get_special_images(special: str) -> str:
             # 'https://i.imgur.com/SpM5Chv.jpg', # bluff
             # 'https://i.pinimg.com/originals/a8/ab/b0/a8abb07aabf631065f727821f9eb81a4.jpg', # luck
             # 'https://www.dogdrip.net/dvs/c/20/01/12/282ced159f23c8ee93a25fa0b37f2f52.jpg',
+            'https://i2.ruliweb.com/ori/19/09/14/16d2e7f2a1f4ef6d2.jpg',
             'https://opgg-com-image.akamaized.net/attach/images/20190616133629.752528.jpeg',
             'https://image.fmkorea.com/files/attach/new/20180908/486616/944884088/1256967785/c1384c8976b775eddb246cc2f82082ff.png',
             'https://i1.ruliweb.com/img/19/12/05/16ed44590ad3623dd.jpg',
