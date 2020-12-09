@@ -21,6 +21,7 @@ def get_special_images(special: str) -> str:
             'https://image.fmkorea.com/files/attach/new/20180908/486616/944884088/1256967785/c1384c8976b775eddb246cc2f82082ff.png',
             'https://i1.ruliweb.com/img/19/12/05/16ed44590ad3623dd.jpg',
             'https://i3.ruliweb.com/ori/20/12/05/17632dc5aae533261.gif',
+            'https://upload3.inven.co.kr/upload/2020/12/07/bbs/i013356575322.gif', # 당연히 말이 되죠
             ),
         }
 
