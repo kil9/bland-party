@@ -562,7 +562,7 @@ def handle_message(event):
         show_ranking(ratings_info, event)
     elif splitted[0] in ('!명언', '!망언', '!пословица'):
         show_today_message(member_info, event)
-    elif splitted[0] in ('!형량예측', '!형량', '!항소'):
+    elif splitted[0] in ('!형량예측', '!형량', '!항소', '!상고'):
         predict_verdict(event)
     elif splitted[0] == '!임포스터':
         check_imposter(event)
