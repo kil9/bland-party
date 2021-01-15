@@ -104,7 +104,7 @@ def delete_entry(ratings, event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def roll(mod, dc):
+def roll(mod, dc, is_special=False):
     rolled = random.randint(1, 20)  # d20
 
     mod_str = ''
@@ -112,6 +112,10 @@ def roll(mod, dc):
         mod_str = ' ({0}{1:+d})'.format(rolled, mod)
 
     message = '{} {}{} vs. DC {}\n'.format(EMOJI_DICE, rolled+mod, mod_str, dc)
+
+    if is_special:
+        message += '자동성공입니다.'
+        return True, message, ''
 
     if rolled >= 19 or rolled+mod == dc:
         message += '*크리티컬* 굴림에 성공했습니다.'
@@ -182,6 +186,18 @@ def adjust_ranking(ratings, member_info, action, event, designated_target=None):
     if target == '랜덤':
         target = random.choice(tuple(ratings.keys()))
 
+    group_id, user_id = event.source.group_id, event.source.user_id
+    if action == 'special_promote':
+        profile = line_bot_api.get_group_member_profile(group_id, user_id)
+        self_target = '@' + profile.display_name
+        rank = list(ratings.keys()).index(self_target)
+        if rank != 0:
+            message_text = '랭킹 1위만 사면이 가능합니다'
+            text_message = TextSendMessage(text=message_text)
+            messages = [text_message]
+            line_bot_api.reply_message(event.reply_token, messages)
+            return
+
     if designated_target is not None:
         try:
             target = tuple(ratings.keys())[designated_target]
@@ -189,7 +205,6 @@ def adjust_ranking(ratings, member_info, action, event, designated_target=None):
             app.logger.error(e)
             target = random.choice(tuple(ratings.keys()))
 
-    group_id, user_id = event.source.group_id, event.source.user_id
     try:
         rank = list(ratings.keys()).index(target)
     except ValueError as e:
@@ -230,8 +245,9 @@ def adjust_ranking(ratings, member_info, action, event, designated_target=None):
         for k, v in rating_list:
             ratings[k] = v
 
-    if action == 'promote':
-        success, message, special = roll(mod, max(1, 13-rank))
+    if action in ('promote', 'special_promote'):
+        success, message, special = roll(mod, max(1, 13-rank), action == 'special_promote')
+
         if not success:
             profile = line_bot_api.get_group_member_profile(group_id, user_id)
             target = '@' + profile.display_name
@@ -579,6 +595,8 @@ def handle_message(event):
         adjust_ranking(ratings_info, member_info, 'super_demote', event)
     elif splitted[0] in ('!승급', '!공천'):
         adjust_ranking(ratings_info, member_info, 'promote', event)
+    elif splitted[0] in ('!사면', '!특사'):
+        adjust_ranking(ratings_info, member_info, 'special_promote', event)
     elif splitted[0] in ('!등급', '!ранг'):
         show_ranking(ratings_info, event)
     elif splitted[0] in ('!명언', '!망언', '!пословица'):
