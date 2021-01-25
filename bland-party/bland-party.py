@@ -260,6 +260,8 @@ def adjust_ranking(ratings, member_info, action, event, designated_target=None):
         move_index = max(idx - 1, 0)
         if special == 'critical':
             move_index = 0
+        if not success:
+            move_index = min(idx + 1, len(ratings)-1)
 
         moved_steps = moved_step_str(idx, move_index)
 
