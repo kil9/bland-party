@@ -5,7 +5,8 @@ def rreplace(s, old, new, occurrence):
     return new.join(li)
 
 def get_score(word: str):
-    digest = hashlib.sha256(word.encode()).hexdigest()
+    salted = word + '1'
+    digest = hashlib.sha256(salted.encode()).hexdigest()
     o = 0
     for c in digest:
         o += ord(c)
