@@ -328,27 +328,6 @@ def check_imposter(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def check_omikuji(event):
-    splitted = event.message.text.split()
-    if len(splitted) < 2:
-        app.logger.warn('too short message to check imposter')
-        return
-    target = ' '.join(splitted[1:]).replace('@', '')
-
-    score = get_score(target.strip())
-
-    selections = \
-        ('대길', '길', '중길', '소길', '말길', '트루 뉴트럴',
-         '흉', '대흉', '암흑대마흉', '혼돈 악')
-
-    chosen = selections[int(score*10.0) % len(selections)]
-
-    heart = EMOJI_HEART
-    balloon = EMOJI_BALLOON
-    message = f'{balloon} {target}의 2021년 운세: {heart} {chosen} {heart}'
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
-
-
 def show_today_message(member_info, event):
     filtered = filter(lambda x: 'message_today' in x[1], list(member_info.items()))
 
@@ -580,7 +559,7 @@ def handle_message(event):
         '!강등',
         '!불매', '!понижение', '!降等', '!降格', '!こうとう',
         '!저격', '!낙선', '!낙천', '!세무조사',
-        '!기소', '!고소', '!하하하')
+        '!기소', '!고소', '!하하하', '!멈춰')
 
     frequency_commands = ('!빈도', '!частота', '!頻度', '!ひんど')
 
@@ -607,8 +586,6 @@ def handle_message(event):
         predict_verdict(event)
     elif splitted[0] == '!임포스터':
         check_imposter(event)
-    elif splitted[0] == '!오미쿠지':
-        check_omikuji(event)
     elif splitted[0] == '!roll':
         roll_dice(event)
     elif 'http' in event.message.text:
