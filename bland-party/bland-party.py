@@ -282,7 +282,11 @@ def adjust_ranking(ratings, member_info, action, event, designated_target=None):
                 original_content_url=special_image, preview_image_url=special_image)
         messages.append(message)
 
-    line_bot_api.reply_message(event.reply_token, messages)
+    try:
+        line_bot_api.reply_message(event.reply_token, messages)
+    except linebot.exceptions.LineBotApiError as e:
+        app.logger.error(e)
+        app.logger.error(f'image: {special_image}')
 
 
 def show_ranking(ratings, event):
