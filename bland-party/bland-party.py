@@ -312,25 +312,6 @@ def predict_verdict(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
-def check_imposter(event):
-    splitted = event.message.text.split()
-    if len(splitted) < 2:
-        app.logger.warn('too short message to check imposter')
-        return
-    target = ' '.join(splitted[1:]).replace('@', '')
-
-    if random.randint(0, 3) == 0:
-        imposter_message = '임포스터였습니다'
-    else:
-        imposter_message = '임포스터가 아니었습니다'
-
-    message = '. 　。　　　　•　 　ﾟ　　。\n' + \
-              '.　　 。　 ඞ 。　 . •\n' + \
-              f'• {target} 는 {imposter_message}. 　 。　.\n' + \
-              '　 　　。　　　　　　.　　　.　　　　　.\n'
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
-
-
 def show_today_message(member_info, event):
     filtered = filter(lambda x: 'message_today' in x[1], list(member_info.items()))
 
@@ -556,8 +537,6 @@ def handle_message(event):
         show_today_message(member_info, event)
     elif splitted[0] in ('!형량예측', '!형량', '!항소', '!상고'):
         predict_verdict(event)
-    elif splitted[0] == '!임포스터':
-        check_imposter(event)
     elif splitted[0] == '!roll':
         roll_dice(event)
     elif 'http' in event.message.text:
