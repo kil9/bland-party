@@ -9,5 +9,7 @@ EMOJI_3RD = '🥉'
 EMOJI_ROBOT = '🤖'
 EMOJI_BALANCE = '⚖️'
 
+EMOJI_COIN = '📈'
+
 EMOJI_HEART = '❤'
 EMOJI_BALLOON = '💬'

@@ -16,8 +16,7 @@ from linebot.models import (
 from config import app, r, line_bot_api, handler
 from utils import rreplace, get_score, moved_step_str
 from help import help_message
-from emoji import EMOJI_DICE, EMOJI_SMILE, EMOJI_SORRY, EMOJI_1ST, EMOJI_2ND, EMOJI_3RD
-from emoji import EMOJI_ROBOT, EMOJI_BALANCE, EMOJI_HEART, EMOJI_BALLOON
+from emoji import *  # noqa: F403
 from images import get_special_images
 
 
@@ -312,6 +311,13 @@ def predict_verdict(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
 
+def tell_price(event):
+    rand = random.random
+    price = int(sum((rand(), rand(), rand(), rand()))/4.0 * 100000) / 100.0
+    message = f'{EMOJI_COIN} 싱무연코인(SMC) 현재 가격: {price}'
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+
+
 def show_today_message(member_info, event):
     filtered = filter(lambda x: 'message_today' in x[1], list(member_info.items()))
 
@@ -537,6 +543,8 @@ def handle_message(event):
         show_today_message(member_info, event)
     elif splitted[0] in ('!형량예측', '!형량', '!항소', '!상고'):
         predict_verdict(event)
+    elif splitted[0] == '!시세':
+        tell_price(event)
     elif splitted[0] == '!roll':
         roll_dice(event)
     elif 'http' in event.message.text:
